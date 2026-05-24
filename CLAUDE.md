@@ -52,12 +52,14 @@ Triggers: push to `main`, all pull requests.
 package.json                   ESM, Node >=20, deps + scripts
 docs/superpowers/              spec + plan (hand-formatted markdown — Prettier ignores *.md)
 hooks/                         populated in §7 — bash wrappers + cross-platform run-hook.cmd
-lib/                           populated in §2-§5
-  config/                      global.yml / projects.yml / user-prefs.yml R/W
-  entries/                     canonical entry CRUD (file & dir layouts)
-  promote/                     file → dir promotion + reciprocal audit-trail links
-  reports/                     stats / summary / completion / prediction / perf-review
-  hooks/                       SessionStart + PostToolUse hook logic
+lib/
+  config/                      global.yml / projects.yml / user-prefs.yml R/W (§2)
+  git.js                       remote detection + URL normalization (§2)
+  frontmatter.js               YAML frontmatter R/W (§3, pending)
+  entries/                     canonical entry CRUD (§3, pending)
+  promote/                     file → dir promotion + reciprocal audit-trail links (§4, pending)
+  reports/                     stats / summary / completion / prediction / perf-review (§5, pending)
+  hooks/                       SessionStart + PostToolUse hook logic (§7, pending)
 skills/                        populated in §6 — 4 user-facing skill markdowns
   setup / record / promote / report
 test/                          mirrors lib/ structure
@@ -78,7 +80,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | Section | Status | Tasks |
 | --- | --- | --- |
 | §1 Foundation | ✅ Merged (PR #4) | 1-6 — plugin metadata, test infra, Prettier, CI, dir skeleton, tmp helper |
-| §2 Config | ⏳ Pending | 7-10 |
+| §2 Config | ✅ Merged (PR #6) | 7-10 — global / projects (with matcher) / user-prefs YAML R/W; git remote detection & normalization |
 | §3 Entries | ⏳ Pending | 11-16 |
 | §4 Promote | ⏳ Pending | 17-19 |
 | §5 Reports | ⏳ Pending | 20-25 |
