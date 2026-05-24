@@ -60,10 +60,11 @@ lib/
   promote/                     file → dir expansion + cross-bucket move with reciprocal links + orchestrate (§4)
   reports/                     deterministic anchors; summary / completion / prediction collectors; perf-review with hard category isolation; timestamped report writer (§5)
   hooks/                       SessionStart + PostToolUse hook logic (§7, pending)
-skills/                        populated in §6 — 4 user-facing skill markdowns
+skills/                        4 user-facing skill markdowns (§6)
   setup / record / promote / report
 test/                          mirrors lib/ structure
   helpers/tmp.js               withTmpDir(fn) — isolated tmp dirs for filesystem tests
+  skills.test.js               shared frontmatter sanity test for all skills (§6)
 ```
 
 Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real files arrive.
@@ -84,7 +85,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §3 Entries | ✅ Merged (PR #7) | 11-16 — frontmatter R/W; canonical entry paths; create / read / update (frontmatter, doc append, sibling doc) / list with filters |
 | §4 Promote | ✅ Merged (PR #8) | 17-19 — file-to-dir expansion; cross-bucket move with `promoted_from`/`promoted_to` audit links (source preserved); `promote()` orchestration |
 | §5 Reports | ✅ Merged (PR #9) | 20-25 — deterministic anchors (tickets / PRs / avg-days-to-done); summary, completion, prediction collectors; perf-review with phase-1 directory + phase-2 frontmatter category isolation; timestamped report writer |
-| §6 Skills | ⏳ Pending | 26-29 |
+| §6 Skills | ✅ Merged (PR #10) | 26-29 — 4 user-facing SKILL.md (setup / record / promote / report) + shared frontmatter sanity test that auto-validates each skill |
 | §7 Hooks | ⏳ Pending | 30-33 |
 | §8 Polish | ⏳ Pending | 34-36 |
 
