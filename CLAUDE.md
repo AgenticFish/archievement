@@ -51,7 +51,7 @@ Triggers: push to `main`, all pull requests.
 .prettierrc / .prettierignore  Prettier config (100 col, doublequotes, trailing-comma all, semis)
 package.json                   ESM, Node >=20, deps + scripts
 docs/superpowers/              spec + plan (hand-formatted markdown — Prettier ignores *.md)
-hooks/                         populated in §7 — bash wrappers + cross-platform run-hook.cmd
+hooks/                         hooks.json + run-hook.cmd polyglot + session-start / post-tool-use-gh-pr-create bash wrappers (§7)
 lib/
   config/                      global.yml / projects.yml / user-prefs.yml R/W (§2)
   git.js                       remote detection + URL normalization (§2)
@@ -59,7 +59,7 @@ lib/
   entries/                     canonical entry CRUD: path / create / read / update / list (§3)
   promote/                     file → dir expansion + cross-bucket move with reciprocal links + orchestrate (§4)
   reports/                     deterministic anchors; summary / completion / prediction collectors; perf-review with hard category isolation; timestamped report writer (§5)
-  hooks/                       SessionStart + PostToolUse hook logic (§7, pending)
+  hooks/                       SessionStart + PostToolUse hook logic, injectable for tests (§7)
 skills/                        4 user-facing skill markdowns (§6)
   setup / record / promote / report
 test/                          mirrors lib/ structure
@@ -86,7 +86,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §4 Promote | ✅ Merged (PR #8) | 17-19 — file-to-dir expansion; cross-bucket move with `promoted_from`/`promoted_to` audit links (source preserved); `promote()` orchestration |
 | §5 Reports | ✅ Merged (PR #9) | 20-25 — deterministic anchors (tickets / PRs / avg-days-to-done); summary, completion, prediction collectors; perf-review with phase-1 directory + phase-2 frontmatter category isolation; timestamped report writer |
 | §6 Skills | ✅ Merged (PR #10) | 26-29 — 4 user-facing SKILL.md (setup / record / promote / report) + shared frontmatter sanity test that auto-validates each skill |
-| §7 Hooks | ⏳ Pending | 30-33 |
+| §7 Hooks | ✅ Merged (PR #11) | 30-33 — hooks.json + cross-platform run-hook.cmd polyglot; SessionStart hook injecting `<archievement-context>` (project / category / active entries); PostToolUse hook nudging `<archievement-nudge>` after `gh pr create`; guard test for the executable bit |
 | §8 Polish | ⏳ Pending | 34-36 |
 
 Update this table when each section's PR merges.
