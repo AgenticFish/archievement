@@ -57,7 +57,7 @@ lib/
   git.js                       remote detection + URL normalization (§2)
   frontmatter.js               YAML frontmatter R/W via gray-matter (§3)
   entries/                     canonical entry CRUD: path / create / read / update / list (§3)
-  promote/                     file → dir promotion + reciprocal audit-trail links (§4, pending)
+  promote/                     file → dir expansion + cross-bucket move with reciprocal links + orchestrate (§4)
   reports/                     stats / summary / completion / prediction / perf-review (§5, pending)
   hooks/                       SessionStart + PostToolUse hook logic (§7, pending)
 skills/                        populated in §6 — 4 user-facing skill markdowns
@@ -82,7 +82,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §1 Foundation | ✅ Merged (PR #4) | 1-6 — plugin metadata, test infra, Prettier, CI, dir skeleton, tmp helper |
 | §2 Config | ✅ Merged (PR #6) | 7-10 — global / projects (with matcher) / user-prefs YAML R/W; git remote detection & normalization |
 | §3 Entries | ✅ Merged (PR #7) | 11-16 — frontmatter R/W; canonical entry paths; create / read / update (frontmatter, doc append, sibling doc) / list with filters |
-| §4 Promote | ⏳ Pending | 17-19 |
+| §4 Promote | ✅ Merged (PR #8) | 17-19 — file-to-dir expansion; cross-bucket move with `promoted_from`/`promoted_to` audit links (source preserved); `promote()` orchestration |
 | §5 Reports | ⏳ Pending | 20-25 |
 | §6 Skills | ⏳ Pending | 26-29 |
 | §7 Hooks | ⏳ Pending | 30-33 |
