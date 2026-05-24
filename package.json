@@ -1,0 +1,21 @@
+{
+  "name": "archievement",
+  "version": "0.1.0",
+  "description": "Claude Code plugin: private work-memory archiver.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test $(find test -name '*.test.js')",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.0"
+  }
+}

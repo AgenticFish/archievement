@@ -1,0 +1,11 @@
+{
+  "name": "archievement",
+  "description": "Private work-memory archiver — distills Claude Code session content into a structured local markdown tree, with reports and perf-review draft generation.",
+  "version": "0.1.0",
+  "author": {
+    "name": "irene.yu"
+  },
+  "repository": "https://github.com/AgenticFish/archievement",
+  "license": "MIT",
+  "keywords": ["personal-tracking", "work-log", "perf-review", "markdown"]
+}
