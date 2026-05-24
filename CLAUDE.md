@@ -58,7 +58,7 @@ lib/
   frontmatter.js               YAML frontmatter R/W via gray-matter (§3)
   entries/                     canonical entry CRUD: path / create / read / update / list (§3)
   promote/                     file → dir expansion + cross-bucket move with reciprocal links + orchestrate (§4)
-  reports/                     stats / summary / completion / prediction / perf-review (§5, pending)
+  reports/                     deterministic anchors; summary / completion / prediction collectors; perf-review with hard category isolation; timestamped report writer (§5)
   hooks/                       SessionStart + PostToolUse hook logic (§7, pending)
 skills/                        populated in §6 — 4 user-facing skill markdowns
   setup / record / promote / report
@@ -83,7 +83,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §2 Config | ✅ Merged (PR #6) | 7-10 — global / projects (with matcher) / user-prefs YAML R/W; git remote detection & normalization |
 | §3 Entries | ✅ Merged (PR #7) | 11-16 — frontmatter R/W; canonical entry paths; create / read / update (frontmatter, doc append, sibling doc) / list with filters |
 | §4 Promote | ✅ Merged (PR #8) | 17-19 — file-to-dir expansion; cross-bucket move with `promoted_from`/`promoted_to` audit links (source preserved); `promote()` orchestration |
-| §5 Reports | ⏳ Pending | 20-25 |
+| §5 Reports | ✅ Merged (PR #9) | 20-25 — deterministic anchors (tickets / PRs / avg-days-to-done); summary, completion, prediction collectors; perf-review with phase-1 directory + phase-2 frontmatter category isolation; timestamped report writer |
 | §6 Skills | ⏳ Pending | 26-29 |
 | §7 Hooks | ⏳ Pending | 30-33 |
 | §8 Polish | ⏳ Pending | 34-36 |
