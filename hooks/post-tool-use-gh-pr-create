@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+INPUT=$(cat)
+PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT:-"$(cd "$(dirname "$0")/.." && pwd)"}
+
+ADDITIONAL_CONTEXT=$(node --input-type=module -e "
+import { runPostPrCreate } from '${PLUGIN_ROOT}/lib/hooks/post-pr-create.js';
+const raw = ${INPUT@Q};
+const data = JSON.parse(raw);
+const out = await runPostPrCreate({
+  tool_name: data.tool_name ?? '',
+  tool_input: data.tool_input ?? {},
+  tool_output: data.tool_response?.output ?? data.tool_response ?? '',
+});
+process.stdout.write(out.additionalContext);
+")
+
+if [ -z "$ADDITIONAL_CONTEXT" ]; then
+  exit 0
+fi
+
+jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"hookSpecificOutput": {"hookEventName": "PostToolUse", "additionalContext": $ctx}}'
