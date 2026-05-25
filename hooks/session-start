@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Read stdin (a JSON object Claude Code passes in)
+INPUT=$(cat)
+
+# Extract cwd (with jq if available, fallback to grep+sed)
+if command -v jq >/dev/null 2>&1; then
+  CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+else
+  CWD=$(echo "$INPUT" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)
+fi
+
+# Fall back to the current directory if cwd was empty
+if [ -z "${CWD:-}" ]; then
+  CWD=$(pwd)
+fi
+
+PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT:-"$(cd "$(dirname "$0")/.." && pwd)"}
+
+# Execute the Node helper; capture its JSON output
+ADDITIONAL_CONTEXT=$(node --input-type=module -e "
+import { runSessionStart } from '${PLUGIN_ROOT}/lib/hooks/session-start.js';
+const out = await runSessionStart({ cwd: '${CWD}', now: new Date().toISOString().slice(0, 10) });
+process.stdout.write(out.additionalContext);
+")
+
+# If empty, just exit silently
+if [ -z "$ADDITIONAL_CONTEXT" ]; then
+  exit 0
+fi
+
+# Emit hook response JSON
+jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": $ctx}}'
