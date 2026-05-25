@@ -4,9 +4,14 @@ set -euo pipefail
 INPUT=$(cat)
 PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT:-"$(cd "$(dirname "$0")/.." && pwd)"}
 
-ADDITIONAL_CONTEXT=$(node --input-type=module -e "
+# Pass the hook payload through the environment rather than interpolating it
+# into the Node `-e` string. Prior versions used a bash 4.4+ `@Q` parameter
+# expansion to shell-quote the JSON payload — that emits "bad substitution"
+# on macOS bash 3.2 and silently breaks every Bash tool invocation.
+ADDITIONAL_CONTEXT=$(ARCHIEVEMENT_HOOK_INPUT="$INPUT" node --input-type=module -e "
 import { runPostPrCreate } from '${PLUGIN_ROOT}/lib/hooks/post-pr-create.js';
-const raw = ${INPUT@Q};
+const raw = process.env.ARCHIEVEMENT_HOOK_INPUT ?? '';
+if (!raw) process.exit(0);
 const data = JSON.parse(raw);
 const out = await runPostPrCreate({
   tool_name: data.tool_name ?? '',

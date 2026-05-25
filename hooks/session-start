@@ -6,9 +6,9 @@ INPUT=$(cat)
 
 # Extract cwd (with jq if available, fallback to grep+sed)
 if command -v jq >/dev/null 2>&1; then
-  CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+  CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty')
 else
-  CWD=$(echo "$INPUT" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)
+  CWD=$(printf '%s' "$INPUT" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)
 fi
 
 # Fall back to the current directory if cwd was empty
@@ -18,10 +18,14 @@ fi
 
 PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT:-"$(cd "$(dirname "$0")/.." && pwd)"}
 
-# Execute the Node helper; capture its JSON output
-ADDITIONAL_CONTEXT=$(node --input-type=module -e "
+# Pass CWD via env var so paths containing apostrophes or other shell-sensitive
+# characters don't corrupt the inlined JS string.
+ADDITIONAL_CONTEXT=$(ARCHIEVEMENT_HOOK_CWD="$CWD" node --input-type=module -e "
 import { runSessionStart } from '${PLUGIN_ROOT}/lib/hooks/session-start.js';
-const out = await runSessionStart({ cwd: '${CWD}', now: new Date().toISOString().slice(0, 10) });
+const out = await runSessionStart({
+  cwd: process.env.ARCHIEVEMENT_HOOK_CWD ?? '',
+  now: new Date().toISOString().slice(0, 10),
+});
 process.stdout.write(out.additionalContext);
 ")
 
