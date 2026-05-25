@@ -4,7 +4,35 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { withTmpDir } from "../helpers/tmp.js";
-import { writeReport, makeReportFilename } from "../../lib/reports/write.js";
+import { writeReport, makeReportFilename, localTimestamp } from "../../lib/reports/write.js";
+
+test("localTimestamp formats a given Date in local time with zero-padded fields", () => {
+  // May = month index 4. Date constructor treats fields as local.
+  const d = new Date(2026, 4, 25, 14, 32);
+  assert.equal(localTimestamp(d), "2026-05-25T14-32");
+});
+
+test("localTimestamp zero-pads single-digit month/day/hour/minute", () => {
+  const d = new Date(2026, 0, 5, 9, 7);
+  assert.equal(localTimestamp(d), "2026-01-05T09-07");
+});
+
+test("makeReportFilename defaults timestamp to localTimestamp() when omitted", () => {
+  const name = makeReportFilename({ kind: "summary" });
+  assert.match(name, /^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-summary\.md$/);
+});
+
+test("writeReport defaults timestamp to localTimestamp() when omitted", async () => {
+  await withTmpDir(async (root) => {
+    const path = writeReport(root, {
+      kind: "summary",
+      frontmatter: { type: "report", kind: "summary" },
+      body: "# Summary\n",
+    });
+    assert.match(path, /\/reports\/\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-summary\.md$/);
+    assert.ok(existsSync(path));
+  });
+});
 
 test("makeReportFilename uses timestamp suffix for ordinary kinds", () => {
   const name = makeReportFilename({ kind: "summary", timestamp: "2026-05-23T14-32" });

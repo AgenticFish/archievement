@@ -20,7 +20,7 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
    b. Call `listEntries(root, { category? })` from `lib/entries/list.js`.
    c. Call `buildSummary(entries, { now: today, staleDays: global.stale_days })` from `lib/reports/summary.js`.
    d. Determine output language (per session/global preference).
-   e. Write the report via `writeReport(root, { kind: "summary", timestamp, frontmatter, body })`.
+   e. Write the report via `writeReport(root, { kind: "summary", frontmatter, body })`. Omit `timestamp` — `writeReport` defaults it to the current local time (see Invariants).
 
 4. **For `completion`:**
    a. AskUserQuestion range: `last 7 days / last 30 days / last 90 days / specify range`.
@@ -51,3 +51,4 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
 - **`perf-review` never has access to the other category's data.** The data-collection function physically skips the other directory; do not try to widen the scope.
 - **Anchors are sacred.** Numbers in perf-review reports come from `data.anchors`, not from estimation. If the user asks "what about my PR count for X", point them at the report's Anchors section, not your own count.
 - **`prediction` is allowed to cross categories** (per spec §5.4) but the report's output is never auto-fed into a perf-review.
+- **Never inline a UTC-derived timestamp into `writeReport`.** Always omit `opts.timestamp` (or pass `localTimestamp()` from `lib/reports/write.js`) — passing `new Date().toISOString().slice(0, 16).replace(":", "-")` produces UTC and crosses the date boundary on US evenings.
