@@ -22,7 +22,7 @@ Create the archievement folder and its config files, then write a discovery poin
 4. **Create directory skeleton** via Bash:
 
    ```
-   mkdir -p "$ROOT"/{work/{ticketed,unticketed,learning,ideas},personal/{ticketed,unticketed,learning,ideas},reports/perf-review,config}
+   mkdir -p "$ROOT"/{work/{ticketed,unticketed,learning,idea},personal/{ticketed,unticketed,learning,idea},reports/perf-review,config}
    ```
 
 5. **Write `config/global.yml`** using the helpers in `lib/config/global.js`. The script invocation looks like:
