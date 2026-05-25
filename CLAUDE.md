@@ -87,6 +87,6 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §5 Reports | ✅ Merged (PR #9) | 20-25 — deterministic anchors (tickets / PRs / avg-days-to-done); summary, completion, prediction collectors; perf-review with phase-1 directory + phase-2 frontmatter category isolation; timestamped report writer |
 | §6 Skills | ✅ Merged (PR #10) | 26-29 — 4 user-facing SKILL.md (setup / record / promote / report) + shared frontmatter sanity test that auto-validates each skill |
 | §7 Hooks | ✅ Merged (PR #11) | 30-33 — hooks.json + cross-platform run-hook.cmd polyglot; SessionStart hook injecting `<archievement-context>` (project / category / active entries); PostToolUse hook nudging `<archievement-nudge>` after `gh pr create`; guard test for the executable bit |
-| §8 Polish | ⏳ Pending | 34-36 |
+| §8 Polish | ✅ Merged (PR #12) | 34-36 — README with install/usage/design pointer; manual E2E smoke test (user-driven, no commit); final consistency review pass |
 
-Update this table when each section's PR merges.
+All 8 sections shipped. The plan in `docs/superpowers/plans/2026-05-23-archievement-implementation.md` is complete.
