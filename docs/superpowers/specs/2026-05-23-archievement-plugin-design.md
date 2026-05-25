@@ -100,7 +100,7 @@ archievement/
         plan.md
         materials/
         progress.md
-    ideas/
+    idea/
       perf-review-auto-tag.md
   personal/
     ticketed/                               # side project with issue tracker
@@ -112,7 +112,7 @@ archievement/
     learning/
       rust-async/
         ...
-    ideas/
+    idea/
       streaming-md-parser.md
   reports/
     2026-05-23-summary.md
@@ -155,7 +155,7 @@ topic: rust-async
 # idea
 seed_date: 2026-05-23
 promoted_to: work/ticketed/PROJ-123         # written when promotion occurs
-promoted_from: work/ideas/foo.md            # back-link on the promoted entry
+promoted_from: work/idea/foo.md            # back-link on the promoted entry
 ```
 
 **Dual source of truth**: `category` and `type` live both in the frontmatter
@@ -212,7 +212,7 @@ Two axes, handled by a single `arch-promote` skill:
 
 1. **Form promotion** (common): `idea` → `ticketed` / `unticketed`, or
    `unticketed` → `ticketed`.
-2. **Cross-category promotion** (rarer): e.g. `personal/ideas/foo.md` →
+2. **Cross-category promotion** (rarer): e.g. `personal/idea/foo.md` →
    `work/ticketed/PROJ-123/` when the company picks up a personal idea.
 
 Promotion flow:
@@ -359,7 +359,7 @@ Day 14  /arch-status   → in-progress → done
 
 ```
 Day 0   /arch-record   → type=idea → category=work → slug perf-review-auto-tag
-                       → writes work/ideas/perf-review-auto-tag.md
+                       → writes work/idea/perf-review-auto-tag.md
 Day 30  /arch-promote  → target type=unticketed → category=work
                        → moves to work/unticketed/perf-review-tagging-poc/
                        → expands file → dir (body into index.md + brainstorm.md)
@@ -446,14 +446,14 @@ done, or learning entries.
 
 ## Ideas worth promoting
 
-- **`work/ideas/perf-review-auto-tag.md`** (seeded 2026-04-12)
+- **`work/idea/perf-review-auto-tag.md`** (seeded 2026-04-12)
   - Connection: PROJ-123 (auth middleware) touches the same competency taxonomy.
   - Connection: just completed `learning/rust-for-team-migration` — Rust syntax is now fluent.
   - Suggested: promote to `work × unticketed`, slug `perf-review-tagging-poc`.
 
 ## Ideas with no clear path yet
 
-- **`personal/ideas/streaming-md-parser.md`** — no recent activity ties to it.
+- **`personal/idea/streaming-md-parser.md`** — no recent activity ties to it.
 ```
 
 **Design call**: prediction **does not** apply category isolation. This report
