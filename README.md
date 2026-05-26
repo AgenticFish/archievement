@@ -22,7 +22,9 @@ In any Claude Code session, run:
 /archievement:setup
 ```
 
-Answer the prompts about where to keep the archievement folder (default `~/archievement`) and your preferred output language.
+Answer the prompts about where to keep the archievement folder (suggested `~/archievement`) and your preferred output language. The setup writes `archievement_root` into `${CLAUDE_PLUGIN_DATA}/config.yml` — Claude Code (>= 2.1.78) creates that directory per plugin under `~/.claude/plugins/data/<plugin-id>/`, and it survives plugin updates.
+
+If you were on an earlier version that used `~/.archievementrc`, the first archievement skill or hook invocation migrates the pointer transparently and removes the old file.
 
 ## Daily use
 

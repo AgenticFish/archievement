@@ -65,13 +65,17 @@ test("post-tool-use-gh-pr-create exits cleanly for non-gh-pr-create commands", (
 });
 
 test("session-start exits cleanly with arbitrary stdin payload", () => {
-  // Without a configured ~/.archievementrc the wrapper should still finish
-  // successfully. We point HOME at an empty tmp dir to skip the live config.
+  // Without a configured plugin-data config the wrapper should still finish
+  // successfully (graceful degradation: empty additionalContext, exit 0).
+  // We point HOME at an empty tmp dir and unset CLAUDE_PLUGIN_DATA to skip
+  // the live config.
   const input = JSON.stringify({ cwd: "/tmp/anywhere", session_id: "abc" });
+  const env = { ...process.env, HOME: "/tmp/__archievement_no_home__" };
+  delete env.CLAUDE_PLUGIN_DATA;
   const result = spawnSync("bash", [join(HOOK_DIR, "session-start")], {
     input,
     encoding: "utf8",
-    env: { ...process.env, HOME: "/tmp/__archievement_no_home__" },
+    env,
   });
   assert.equal(result.status, 0, `script exited ${result.status}; stderr: ${result.stderr}`);
 });

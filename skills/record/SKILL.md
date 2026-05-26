@@ -13,7 +13,14 @@ Invoke when the user wants to save part of the current session: brainstorm, plan
 
 Before any prompting, read the runtime state:
 
-1. **archievement root**: from `~/.archievementrc` (or run `/archievement:setup` if missing — AskUserQuestion to confirm).
+1. **archievement root**: resolve via `lib/config/plugin.js`:
+
+   ```
+   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ resolveArchievementRoot }) => process.stdout.write(resolveArchievementRoot() ?? ''))"
+   ```
+
+   If the output is empty, STOP. Tell the user: "archievement is not set up. Run `/archievement:setup` first, then re-invoke this skill." Do NOT proceed, do NOT search the filesystem, do NOT use a default path.
+
 2. **Project context**: if a `<archievement-context>` block was injected by the SessionStart hook, parse it. It tells you the project slug, category, language, and the list of active entries (`todo` + `in-progress`).
 3. **Current Node module paths**: helpers live under `${CLAUDE_PLUGIN_ROOT}/lib/`. Use them via `node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/<path>').then(...)"` or by writing a small driver to a tmp file and executing it. Never re-implement entry CRUD inline.
 
