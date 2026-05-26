@@ -11,15 +11,15 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
 
 ## Flow
 
-1. **Resolve archievement root.** Pass the plugin-data path explicitly — Claude Code substitutes `${CLAUDE_PLUGIN_DATA}` here, but does NOT inject it as an env var into the Bash subprocess:
+1. **Load the unified plugin config.** Pass the plugin-data path explicitly — Claude Code substitutes `${CLAUDE_PLUGIN_DATA}` here, but does NOT inject it as an env var into the Bash subprocess:
 
    ```
-   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ resolveArchievementRoot }) => process.stdout.write(resolveArchievementRoot({ pluginConfigPath: '${CLAUDE_PLUGIN_DATA}/config.yml' }) ?? ''))"
+   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ loadConfig }) => process.stdout.write(JSON.stringify(loadConfig({ pluginConfigPath: '${CLAUDE_PLUGIN_DATA}/config.yml' }))))"
    ```
 
-   If the output is empty, STOP. Tell the user: "archievement is not set up. Run `/archievement:setup` first, then re-invoke this skill." Do NOT proceed, do NOT search the filesystem, do NOT use a default path.
+   Parse the JSON. If `archievement_root` is null, STOP. Tell the user: "archievement is not set up. Run `/archievement:setup` first, then re-invoke this skill." Do NOT proceed, do NOT search the filesystem, do NOT use a default path.
 
-   Then read `config/global.yml` for `default_language` and `stale_days`. Read `config/user-prefs.yml` for `languages_known`.
+   Otherwise extract `archievement_root`, `default_language`, `stale_days`, and `languages_known` from the parsed config for the steps below.
 
 2. **Ask kind.** AskUserQuestion: "Which report?" options `summary (snapshot) / completion (done in range) / prediction (idea advancement) / perf-review`.
 

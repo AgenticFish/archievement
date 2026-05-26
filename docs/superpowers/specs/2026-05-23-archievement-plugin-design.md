@@ -169,14 +169,21 @@ lose its identity, and `arch-promote` operations stay robust.
 schema, not content; mixing languages there would make parsing brittle. Body
 prose follows the language preference (see §3.4).
 
-### `projects.yml`
+### Unified plugin config (`${CLAUDE_PLUGIN_DATA}/config.yml`)
+
+All plugin runtime config lives in a single file inside Claude Code's
+plugin-data directory:
 
 ```yaml
+archievement_root: /Users/jane/archievement   # written by /archievement:setup
+default_language: zh                          # ISO 639-1 code; any language Claude writes
+stale_days: 21                                # threshold for the ⚠️ stale marker in summary
+languages_known: [zh, en]                     # powers dynamic AskUserQuestion options
 projects:
   - match: { type: git-remote, url: "https://github.com/myorg/project-a.git" }
     slug: project-a
     category: work
-    language: en                            # optional, defaults to global default
+    language: en                              # optional, defaults to global default
   - match: { type: git-remote, url: "https://github.com/AgenticFish/archievement.git" }
     slug: archievement
     category: personal
@@ -184,38 +191,39 @@ projects:
   - match: { type: path, path: "/some/local/dir/without/git" }
     slug: foo
     category: personal
-
-ignore:                                     # "do not track" choices land here
+ignore:                                       # "do not track" choices land here
   - match: { type: path, path: "/path/to/some/ignored/dir" }
 ```
 
-**Matching rule**: prefer `git remote get-url origin`; fall back to absolute
-path when no git remote exists. Reason: the same project may exist in
-multiple local checkouts (for parallel Claude sessions). Matching by git
-remote points every checkout at the same archievement record.
-
-### `global.yml`
-
-```yaml
-default_language: zh                        # ISO 639-1 code; any language Claude writes
-stale_days: 21                              # threshold for the ⚠️ stale marker in summary
-```
-
-The archievement root path itself lives in `${CLAUDE_PLUGIN_DATA}/config.yml`
-(Claude Code-managed plugin user-data dir), not inside the root's own
-`global.yml`. Keeping the pointer outside the data dir means the resolver can
-find the root before reading any file inside it.
-
-### Plugin user-data config (`${CLAUDE_PLUGIN_DATA}/config.yml`)
-
-```yaml
-archievement_root: /Users/jane/archievement   # written by /archievement:setup
-```
+**Why one file in plugin-data, not multiple inside the archievement root**:
+none of these fields are archive content. They are 100% plugin runtime
+metadata (with `projects` also being per-machine, since it includes local
+paths). Keeping them in plugin-data means the archievement root itself
+contains only content (`work/`, `personal/`, `reports/`), the `--keep-data`
+uninstall flag preserves them naturally, and the resolver can find the root
+without reading anything inside the root first.
 
 `CLAUDE_PLUGIN_DATA` is the env var Claude Code (>= 2.1.78) injects into
-plugin subprocesses; the platform auto-creates `~/.claude/plugins/data/<plugin-id>/`
-and preserves it across plugin updates. This is the authoritative source of
-truth for `archievement_root`; no code path uses a default value.
+hook subprocesses; the platform auto-creates `~/.claude/plugins/data/<plugin-id>/`
+and preserves it across plugin updates. (Skill SKILL.md content gets
+`${CLAUDE_PLUGIN_DATA}` template-substituted at load time; Bash-tool
+subprocesses do NOT receive the env var, so skill code must pass the path
+explicitly to the lib helpers — see `lib/config/plugin.js`.)
+
+**Matching rule** (for `projects`): prefer `git remote get-url origin`;
+fall back to absolute path when no git remote exists. Reason: the same
+project may exist in multiple local checkouts (for parallel Claude
+sessions). Matching by git remote points every checkout at the same
+archievement record.
+
+**No defaults in code**. If `archievement_root` is null in the config, every
+skill stops and instructs the user to run `/archievement:setup` — no code
+path falls back to a default path.
+
+**Migration**: `loadConfig()` performs one-time lazy migration of any legacy
+sources it finds — `~/.archievementrc` (pre-0.1.2 root pointer) and
+`<root>/config/{global,projects,user-prefs}.yml` (pre-0.1.4 per-file
+configs). Migrated files are unlinked; `<root>/config/` is removed if empty.
 
 ### `user-prefs.yml` (lightweight self-memory)
 
