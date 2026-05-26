@@ -13,10 +13,10 @@ Create the archievement folder and its config files, then write `archievement_ro
 
 ## Flow
 
-1. **Detect existing setup.** Call `resolveArchievementRoot()` from `lib/config/plugin.js`:
+1. **Detect existing setup.** Call `resolveArchievementRoot()` from `lib/config/plugin.js`. Pass the plugin-data path explicitly — Claude Code substitutes `${CLAUDE_PLUGIN_DATA}` here, but does NOT inject it as an env var into the Bash subprocess:
 
    ```
-   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ resolveArchievementRoot }) => process.stdout.write(resolveArchievementRoot() ?? ''))"
+   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ resolveArchievementRoot }) => process.stdout.write(resolveArchievementRoot({ pluginConfigPath: '${CLAUDE_PLUGIN_DATA}/config.yml' }) ?? ''))"
    ```
 
    - If the output is non-empty AND the directory contains `config/global.yml`, AskUserQuestion: "archievement is already set up at `<path>`. Re-initialize?" options `Keep existing` / `Re-run setup`. Stop if they choose Keep.
@@ -49,17 +49,17 @@ Create the archievement folder and its config files, then write `archievement_ro
 
 7. **Write `config/user-prefs.yml`** with `languages_known: [<chosen>, "en"]` (deduped).
 
-8. **Write `${CLAUDE_PLUGIN_DATA}/config.yml`** via `writePluginConfig` from `lib/config/plugin.js`:
+8. **Write `${CLAUDE_PLUGIN_DATA}/config.yml`** via `writePluginConfig` from `lib/config/plugin.js`. Pass the path explicitly so the helper doesn't try to read the `CLAUDE_PLUGIN_DATA` env var (which is not present in Bash-tool subprocesses):
 
    ```
    node -e "
-     import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ getPluginConfigPath, writePluginConfig }) =>
-       writePluginConfig(getPluginConfigPath(), { archievement_root: '$ROOT' })
+     import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ writePluginConfig }) =>
+       writePluginConfig('${CLAUDE_PLUGIN_DATA}/config.yml', { archievement_root: '$ROOT' })
      );
    "
    ```
 
-   Requires Claude Code >= 2.1.78 (where `CLAUDE_PLUGIN_DATA` is injected). If the env var is missing, the helper throws a clear error.
+   Requires Claude Code >= 2.1.78, which substitutes `${CLAUDE_PLUGIN_DATA}` inline in skill content.
 
 9. **Confirm completion.** Tell the user:
    - Where the archievement folder was written
