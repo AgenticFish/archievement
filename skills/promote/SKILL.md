@@ -14,19 +14,27 @@ Invoke when an existing entry needs to graduate to a new form:
 
 ## Flow
 
-1. **Identify the source entry.** AskUserQuestion: "Which entry are you promoting?" Show active entries from the session context block; offer `Search by id/slug` as an escape hatch.
+1. **Resolve archievement root.** Call:
 
-2. **Ask the target.** AskUserQuestion sequentially:
+   ```
+   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ resolveArchievementRoot }) => process.stdout.write(resolveArchievementRoot() ?? ''))"
+   ```
+
+   If the output is empty, STOP. Tell the user: "archievement is not set up. Run `/archievement:setup` first, then re-invoke this skill." Do NOT proceed, do NOT search the filesystem, do NOT use a default path.
+
+2. **Identify the source entry.** AskUserQuestion: "Which entry are you promoting?" Show active entries from the session context block; offer `Search by id/slug` as an escape hatch.
+
+3. **Ask the target.** AskUserQuestion sequentially:
    - Target type: `ticketed / unticketed / learning / idea` (default to a sensible next step based on source type).
    - Target category: `work / personal` (default to source category).
    - Target id or slug. For `ticketed`, ask for the ticket ID. For others, propose a kebab-case slug derived from the source title; let the user edit.
    - Target layout: `dir / file` — required if source is file-layout and the user wants dir.
 
-3. **Show a plan.** Print: "Promoting `<source>` → `<target>`. The source will be marked `done`, with `promoted_to: <target>`. The target gets `promoted_from: <source>`." AskUserQuestion `Proceed / Cancel`.
+4. **Show a plan.** Print: "Promoting `<source>` → `<target>`. The source will be marked `done`, with `promoted_to: <target>`. The target gets `promoted_from: <source>`." AskUserQuestion `Proceed / Cancel`.
 
-4. **Execute.** Call `promote()` from `lib/promote/orchestrate.js`. Pass `now = today (YYYY-MM-DD)`, `targetLayout`, and any type-specific `extras` (e.g., `ticket_id`, `project`).
+5. **Execute.** Call `promote()` from `lib/promote/orchestrate.js`. Pass `now = today (YYYY-MM-DD)`, `targetLayout`, and any type-specific `extras` (e.g., `ticket_id`, `project`).
 
-5. **Report.** Tell the user the new entry's path and remind them the source is preserved (audit trail), not deleted.
+6. **Report.** Tell the user the new entry's path and remind them the source is preserved (audit trail), not deleted.
 
 ## Invariants
 

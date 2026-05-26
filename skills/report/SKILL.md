@@ -11,7 +11,15 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
 
 ## Flow
 
-1. **Read setup.** Resolve archievement root from `~/.archievementrc`. Read `config/global.yml` for `default_language` and `stale_days`. Read `config/user-prefs.yml` for `languages_known`.
+1. **Resolve archievement root.** Call:
+
+   ```
+   node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/config/plugin.js').then(({ resolveArchievementRoot }) => process.stdout.write(resolveArchievementRoot() ?? ''))"
+   ```
+
+   If the output is empty, STOP. Tell the user: "archievement is not set up. Run `/archievement:setup` first, then re-invoke this skill." Do NOT proceed, do NOT search the filesystem, do NOT use a default path.
+
+   Then read `config/global.yml` for `default_language` and `stale_days`. Read `config/user-prefs.yml` for `languages_known`.
 
 2. **Ask kind.** AskUserQuestion: "Which report?" options `summary (snapshot) / completion (done in range) / prediction (idea advancement) / perf-review`.
 

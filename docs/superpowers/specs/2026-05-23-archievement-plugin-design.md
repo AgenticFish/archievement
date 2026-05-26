@@ -25,10 +25,12 @@ progress reports and personal performance review drafts on demand.
 ### Three layers
 
 1. **Data layer** — `archievement/` is a user-chosen visible directory
-   (default `~/archievement/`). Plain markdown plus YAML frontmatter, no
+   (suggested `~/archievement/`). Plain markdown plus YAML frontmatter, no
    database, no external service, no token. Uninstalling the plugin leaves all
    data as ordinary files that any editor, `grep`, Obsidian, or a future
-   LLM-Wiki can pick up.
+   LLM-Wiki can pick up. The user picks the path during `/archievement:setup`
+   and it is stored in `${CLAUDE_PLUGIN_DATA}/config.yml` — no silent default
+   exists in code.
 
 2. **Skill layer** — A small set of focused skills. Each is invocable by the
    user via `/<verb>` and is also callable by Claude during a conversation.
@@ -197,8 +199,23 @@ remote points every checkout at the same archievement record.
 ```yaml
 default_language: zh                        # ISO 639-1 code; any language Claude writes
 stale_days: 21                              # threshold for the ⚠️ stale marker in summary
-archievement_root: ~/archievement                # written by arch-setup
 ```
+
+The archievement root path itself lives in `${CLAUDE_PLUGIN_DATA}/config.yml`
+(Claude Code-managed plugin user-data dir), not inside the root's own
+`global.yml`. Keeping the pointer outside the data dir means the resolver can
+find the root before reading any file inside it.
+
+### Plugin user-data config (`${CLAUDE_PLUGIN_DATA}/config.yml`)
+
+```yaml
+archievement_root: /Users/jane/archievement   # written by /archievement:setup
+```
+
+`CLAUDE_PLUGIN_DATA` is the env var Claude Code (>= 2.1.78) injects into
+plugin subprocesses; the platform auto-creates `~/.claude/plugins/data/<plugin-id>/`
+and preserves it across plugin updates. This is the authoritative source of
+truth for `archievement_root`; no code path uses a default value.
 
 ### `user-prefs.yml` (lightweight self-memory)
 

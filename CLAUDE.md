@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project is
 
-`archievement` is a Claude Code plugin: a private work-memory archiver. It takes content from a Claude Code session (brainstorms, plans, PR summaries, learning logs, ideas) and writes it as structured markdown under a user-chosen root directory (default `~/archievement/`). It also generates progress reports and personal performance-review drafts.
+`archievement` is a Claude Code plugin: a private work-memory archiver. It takes content from a Claude Code session (brainstorms, plans, PR summaries, learning logs, ideas) and writes it as structured markdown under a user-chosen root directory (suggested `~/archievement/`). It also generates progress reports and personal performance-review drafts.
+
+The root path is resolved at runtime via `lib/config/plugin.js`'s `resolveArchievementRoot()`, which reads `${CLAUDE_PLUGIN_DATA}/config.yml` — Claude Code (>= 2.1.78) injects `CLAUDE_PLUGIN_DATA` and auto-creates that directory per plugin. There is no silent default: if the config is missing, every skill stops and instructs the user to run `/archievement:setup`. A one-time migration handles users who still have the legacy `~/.archievementrc` pointer file.
 
 The core design rule is **"sink, not source"**: the plugin consumes context that other tools / MCPs / the user have already loaded into the session. It does **not** call external APIs (no JIRA, GitHub, Slack, etc.). This makes the plugin vendor-neutral, dependency-free, and immune to expired tokens or rate limits.
 

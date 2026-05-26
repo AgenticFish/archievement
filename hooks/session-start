@@ -19,7 +19,10 @@ fi
 PLUGIN_ROOT=${CLAUDE_PLUGIN_ROOT:-"$(cd "$(dirname "$0")/.." && pwd)"}
 
 # Pass CWD via env var so paths containing apostrophes or other shell-sensitive
-# characters don't corrupt the inlined JS string.
+# characters don't corrupt the inlined JS string. The `|| true` guard keeps
+# `set -e` from killing the hook when the node call exits non-zero (e.g.
+# CLAUDE_PLUGIN_DATA missing on Claude Code < 2.1.78); we degrade silently to
+# empty context.
 ADDITIONAL_CONTEXT=$(ARCHIEVEMENT_HOOK_CWD="$CWD" node --input-type=module -e "
 import { runSessionStart } from '${PLUGIN_ROOT}/lib/hooks/session-start.js';
 const out = await runSessionStart({
@@ -27,7 +30,7 @@ const out = await runSessionStart({
   now: new Date().toISOString().slice(0, 10),
 });
 process.stdout.write(out.additionalContext);
-")
+" 2>/dev/null) || ADDITIONAL_CONTEXT=""
 
 # If empty, just exit silently
 if [ -z "$ADDITIONAL_CONTEXT" ]; then
