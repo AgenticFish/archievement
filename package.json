@@ -1,6 +1,6 @@
 {
   "name": "archievement",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Claude Code plugin: private work-memory archiver.",
   "type": "module",
   "engines": {
