@@ -412,8 +412,13 @@ generated: 2026-05-23
 range: snapshot | 2026-04-23..2026-05-23
 language: zh
 category_filter: work | personal | both | null
+project_filter: <slug> | unregistered | null   # summary/completion only
 ---
 ```
+
+`project_filter` applies only to `summary` and `completion`. `prediction` is
+cross-project by design (§5.4) and `perf-review` filters by category, not
+project (§5.5).
 
 ### 5.2 Summary (snapshot)
 
@@ -554,6 +559,9 @@ Steps 1+2 are a **structural guarantee** (the LLM cannot mix what it cannot
 see); 3+4 are belt-and-suspenders. The other reports
 (summary / prediction / completion) accept an optional category filter and
 default to `both`, because they are private trackers with no accident risk.
+`summary` and `completion` additionally accept an optional project filter
+(any registered slug, or `unregistered` for entries with no `project` field);
+`prediction` and `perf-review` do not.
 
 ---
 
