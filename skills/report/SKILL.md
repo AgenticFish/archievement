@@ -19,22 +19,27 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
 
    Parse the JSON. If `archievement_root` is null, STOP. Tell the user: "archievement is not set up. Run `/archievement:setup` first, then re-invoke this skill." Do NOT proceed, do NOT search the filesystem, do NOT use a default path.
 
-   Otherwise extract `archievement_root`, `default_language`, `stale_days`, and `languages_known` from the parsed config for the steps below.
+   Otherwise extract `archievement_root`, `default_language`, `stale_days`, `languages_known`, and `projects` from the parsed config for the steps below.
 
 2. **Ask kind.** AskUserQuestion: "Which report?" options `summary (snapshot) / completion (done in range) / prediction (idea advancement) / perf-review`.
 
 3. **For `summary`:**
    a. AskUserQuestion category filter (optional): `both / work only / personal only`. Default `both`.
-   b. Call `listEntries(root, { category? })` from `lib/entries/list.js`.
-   c. Call `buildSummary(entries, { now: today, staleDays: global.stale_days })` from `lib/reports/summary.js`.
-   d. Determine output language (per session/global preference).
-   e. Write the report via `writeReport(root, { kind: "summary", frontmatter, body })`. Omit `timestamp` — `writeReport` defaults it to the current local time (see Invariants).
+   b. AskUserQuestion project filter (optional). Build options dynamically from `config.projects`: `all projects` + one option per registered slug + `unregistered (no project field)`. Default `all projects`. If `config.projects` is empty, skip this question and use `all projects`.
+   c. Call `listEntries(root, { category?, project? })` from `lib/entries/list.js`. Wiring:
+      - `all projects` → omit the `project` filter.
+      - `<slug>` → pass `project: "<slug>"`.
+      - `unregistered (no project field)` → omit the `project` filter and post-filter the results in the node script: `entries.filter((e) => !e.data.project)`. `listEntries` does not have a sentinel for "no project field" by design — keep this filter in the skill.
+   d. Call `buildSummary(entries, { now: today, staleDays: global.stale_days })` from `lib/reports/summary.js`.
+   e. Determine output language (per session/global preference).
+   f. Write the report via `writeReport(root, { kind: "summary", frontmatter, body })`. Omit `timestamp` — `writeReport` defaults it to the current local time (see Invariants). Record the chosen project filter in the frontmatter as `project_filter: "<slug>" | "unregistered" | null` (null when `all projects`).
 
 4. **For `completion`:**
    a. AskUserQuestion range: `last 7 days / last 30 days / last 90 days / specify range`.
    b. AskUserQuestion category filter (optional, default both).
-   c. `listEntries` + `buildCompletion(entries, { from, to })`.
-   d. Write report.
+   c. AskUserQuestion project filter (optional) — same dynamic options and wiring as step 3b/3c (`all projects` / each registered slug / `unregistered`, default `all projects`, skip if `config.projects` is empty). For `unregistered`, post-filter the `listEntries` result with `entries.filter((e) => !e.data.project)`.
+   d. `listEntries(root, { category?, project?, ... })` + `buildCompletion(entries, { from, to })`.
+   e. Write report. Record the chosen project filter in the frontmatter as `project_filter: "<slug>" | "unregistered" | null`.
 
 5. **For `prediction`:**
    a. AskUserQuestion lookback: `last 60 days (default) / specify`.
