@@ -37,7 +37,7 @@ Before any prompting, read the runtime state:
    d. Pull content from session accordingly. For PR summaries, also pull the PR ID, title, URL from context (look for the `<archievement-nudge>` block that the `gh pr create` hook injected, or ask the user).
    e. Draft the markdown section. Use the language resolved from project's language (frontmatter `language` in projects.yml entry) → falling back to global default.
    f. Show the user the draft. AskUserQuestion: `Save / Let me edit / Cancel`.
-   g. On save: call `appendToDoc` or `writeSiblingDoc` (for pr-summaries) from `lib/entries/update.js`. Also call `updateEntryFrontmatter` to bump `updated`.
+   g. On save: call `appendToDoc(root, ptr, docName, text)` (4 positional args — `docName` is ignored for file-layout entries but **must still be passed**, otherwise `text` lands as `undefined` and `appendBody` throws a `TypeError`) or `writeSiblingDoc(root, ptr, relPath, content)` (for pr-summaries) from `lib/entries/update.js`. Also call `updateEntryFrontmatter` to bump `updated`.
    h. AskUserQuestion: "Update status?" options `Leave as is / todo / in-progress / done`. If changed, call `updateEntryFrontmatter`.
 
 3. **If creating a new entry:**
