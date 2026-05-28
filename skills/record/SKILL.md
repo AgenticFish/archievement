@@ -32,12 +32,17 @@ Before any prompting, read the runtime state:
 
 2. **If updating an existing entry:**
    a. AskUserQuestion: "Which entry?" with options drawn from the active entries list, plus a `Search all entries` escape hatch.
-   b. AskUserQuestion: "What doc?" options `progress / brainstorm / plan / tasks / pr-summary / new section in main body`. (`pr-summary` only valid for dir-layout entries.)
+   b. AskUserQuestion: "What doc?" — options depend on layout. For **file-layout** entries the only option is `new section in main body` (file-layout has no sibling slot). For **dir-layout** entries: `progress / brainstorm / plan / tasks / pr-summary / new section in main body`.
    c. AskUserQuestion: "What scope of the session content?" options `entire session / last N turns (pick N) / I'll specify a range / I'll tell you the content directly`.
    d. Pull content from session accordingly. For PR summaries, also pull the PR ID, title, URL from context (look for the `<archievement-nudge>` block that the `gh pr create` hook injected, or ask the user).
    e. Draft the markdown section. Use the language resolved from project's language (frontmatter `language` in projects.yml entry) → falling back to global default.
    f. Show the user the draft. AskUserQuestion: `Save / Let me edit / Cancel`.
-   g. On save: call `appendToDoc(root, ptr, docName, text)` (4 positional args — `docName` is ignored for file-layout entries but **must still be passed**, otherwise `text` lands as `undefined` and `appendBody` throws a `TypeError`) or `writeSiblingDoc(root, ptr, relPath, content)` (for pr-summaries) from `lib/entries/update.js`. Also call `updateEntryFrontmatter` to bump `updated`.
+   g. On save: route by doc choice. All helpers live in `lib/entries/update.js`.
+      - `new section in main body` → `appendToBody(root, ptr, text)`. Works on both layouts: appends to the `.md` body for file-layout, to `<dir>/index.md` body for dir-layout. Frontmatter is preserved.
+      - `progress / brainstorm / plan / tasks` → `appendToSiblingDoc(root, ptr, docName, text)`. Dir-layout only; throws on file-layout.
+      - `pr-summary` → `writeSiblingDoc(root, ptr, "pr-summaries/<date>-pr-<n>.md", content)`. Dir-layout only.
+
+      Then call `updateEntryFrontmatter` to bump `updated`.
    h. AskUserQuestion: "Update status?" options `Leave as is / todo / in-progress / done`. If changed, call `updateEntryFrontmatter`.
 
 3. **If creating a new entry:**
