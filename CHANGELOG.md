@@ -5,6 +5,21 @@ All notable changes to the `archievement` plugin are recorded here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2026-05-28
+
+### Changed
+
+- **`appendToDoc` split into `appendToBody` and `appendToSiblingDoc`.** The old 4-arg signature with `docName` ignored-on-file-layout was a silent footgun. `appendToBody(root, ptr, text)` appends to the entry's main body (file-layout: the `.md` file; dir-layout: `<dir>/index.md`). `appendToSiblingDoc(root, ptr, docName, text)` appends to `<dir>/<docName>.md`; throws on file-layout. `appendToDoc` is deleted. `skills/record/SKILL.md` step 2b now adapts the doc menu to layout; step 2g routes each doc choice to the correct helper. ([#23](https://github.com/AgenticFish/archievement/pull/23))
+
+### Fixed
+
+- **`appendBody` throws `TypeError` on non-string `text`.** Previously a non-string was silently coerced via `String(text)`, so a 3-arg `appendToDoc(root, ptr, section)` call (natural for file-layout where `docName` is ignored) wrote the literal string `"undefined"` to the entry body. `appendToSiblingDoc` carries the same guard (sibling-doc writes bypass `appendBody`). ([#22](https://github.com/AgenticFish/archievement/pull/22))
+- **`appendToBody` on dir-layout entries now correctly appends to `<dir>/index.md`.** Latent bug from the old `appendToDoc`: picking "new section in main body" silently wrote to `<dir>/main-body.md` (a sibling) instead of the body. ([#23](https://github.com/AgenticFish/archievement/pull/23))
+
+### Tests
+
+- 106 → 109. `appendBody` non-string guard (+1), and the `appendToBody` / `appendToSiblingDoc` split tests (+2 net after removing the two old `appendToDoc` tests).
+
 ## [0.1.5] - 2026-05-27
 
 ### Added
