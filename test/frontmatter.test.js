@@ -68,3 +68,15 @@ test("appendBody adds content to the end of the body, preserving frontmatter", a
     assert.ok(body.indexOf("Original") < body.indexOf("New section"));
   });
 });
+
+test("appendBody throws when text is not a string and leaves the file unchanged", async () => {
+  await withTmpDir(async (dir) => {
+    const path = join(dir, "entry.md");
+    writeFrontmatter(path, { category: "work" }, "# Title\n\nOriginal.\n");
+    const before = readFileSync(path, "utf8");
+    for (const bad of [undefined, null, 0, false, {}, []]) {
+      assert.throws(() => appendBody(path, bad), /appendBody.*string/i);
+    }
+    assert.equal(readFileSync(path, "utf8"), before);
+  });
+});
