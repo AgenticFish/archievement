@@ -21,7 +21,7 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
 
    Otherwise extract `archievement_root`, `default_language`, `stale_days`, `languages_known`, and `projects` from the parsed config for the steps below.
 
-2. **Ask kind.** AskUserQuestion: "Which report?" options `summary (snapshot) / completion (done in range) / prediction (idea advancement) / perf-review`.
+2. **Ask kind.** AskUserQuestion: "Which report?" options `summary (snapshot) / completion (done in range) / prediction (idea advancement) / perf-review / refresh-prediction-status (re-resolve table of an existing prediction)`.
 
 3. **For `summary`:**
    a. AskUserQuestion category filter (optional): `both / work only / personal only`. Default `both`.
@@ -45,7 +45,29 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
    a. AskUserQuestion lookback: `last 60 days (default) / specify`.
    b. `collectPredictionData(root, { now, lookbackDays })` from `lib/reports/prediction.js`.
    c. **Synthesize the narrative yourself** using the LLM (this is not Node code). Layout: list each idea, propose connections to recent active/done entries by reading their summaries, suggest a promotion target (type/category/slug). Skip ideas with no clear connection (put them under "No clear path yet").
-   d. Write report.
+   d. **Embed an anchored status table.** Immediately below the intro/lookback line and *before* "Promotion suggestions", include a `## Status` section with this exact structure (anchors are required):
+
+      ```
+      <!-- archievement:status-table:start -->
+
+      | Idea | Classification | Status |
+      | --- | --- | --- |
+      | <slug> | <your short label, e.g. "small unticketed"> | (pending) |
+      ...
+      <!-- archievement:status-table:end -->
+      ```
+
+      One row per idea in `data.ideas`, preserving that order. The `Classification` cell is your own per-idea label (match the wording you use in the narrative below — "small unticketed", "medium unticketed", "needs brainstorm", etc.). The `Status` cell MUST be the literal `(pending)` placeholder — step 5e resolves it.
+
+   e. **Freshen the table** before writing. Write the drafted body to a temp file and run a small driver that calls `freshenStatusTable(body, root)` from `lib/reports/prediction-status.js`, then use the returned string as the body for `writeReport`. Example one-liner (substitute concrete paths):
+
+      ```
+      node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/reports/prediction-status.js').then(async ({ freshenStatusTable }) => { const { readFileSync, writeFileSync } = await import('node:fs'); const body = readFileSync('/tmp/pred-body.md', 'utf8'); writeFileSync('/tmp/pred-body.md', freshenStatusTable(body, '<archievement_root>')); })"
+      ```
+
+      If this throws `MissingAnchorsError`, you forgot the anchors in 5d — regenerate the body and try again.
+
+   f. Write the report via `writeReport(root, { kind: "prediction", frontmatter, body })` using the freshened body.
 
 6. **For `perf-review`:**
    a. AskUserQuestion category: `work / personal`. **No `both` option** (single-audience).
@@ -57,7 +79,12 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
    g. Always append the disclaimer from spec §5.5 verbatim.
    h. Write report under `reports/perf-review/<timestamp>-<category>.md`.
 
-7. **Tell the user the report's path.**
+7. **For `refresh-prediction-status`:**
+   a. List candidate reports — `<archievement_root>/reports/*-prediction.md` (exclude the `perf-review/` subdir). AskUserQuestion: "Which prediction report to refresh?" Build options from the file basenames, ordered most-recent-first by mtime; default = most recent. If no candidates exist, tell the user and stop.
+   b. Call `refreshReportFile(<reportPath>, root)` from `lib/reports/prediction-status.js`. If it throws `MissingAnchorsError`, surface a clear message: "This report predates the status-table feature. Regenerate via `prediction` to embed a table." Do not modify the file.
+   c. Read the updated report and print the contents of the anchored block (between `<!-- archievement:status-table:start -->` and `<!-- archievement:status-table:end -->`) so the user can see the resolved table. Mention whether `changed` was `true` or `false`.
+
+8. **Tell the user the report's path.**
 
 ## Invariants
 
