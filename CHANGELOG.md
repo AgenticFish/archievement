@@ -5,6 +5,16 @@ All notable changes to the `archievement` plugin are recorded here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2026-05-29
+
+### Added
+
+- **Prediction reports embed a refreshable status table.** Each newly generated `prediction` report now includes an anchored markdown table (`<!-- archievement:status-table:start --> … :end -->`) listing every covered idea and its status, resolved deterministically from entry frontmatter (own status, `→ <promoted_to> (<target_status>)`, or `gone`). A new `refresh-prediction-status` branch on `/archievement:report` re-resolves the table of an existing report in place without an LLM call — prose stays frozen, the status column refreshes. Reports predating the feature throw `MissingAnchorsError` cleanly. Generation and refresh share one renderer via `lib/reports/prediction-status.js` (`freshenStatusTable` / `refreshReportFile`). First report-side use of the "frozen LLM prose + refreshable deterministic block" pattern. ([#25](https://github.com/AgenticFish/archievement/pull/25))
+
+### Tests
+
+- 109 → 120. New `test/reports/prediction-status.test.js` (+11): render, parse, status resolution across 4 cell variants, freshen (success + missing-anchors), and `refreshReportFile` round-trip + idempotence.
+
 ## [0.1.6] - 2026-05-28
 
 ### Changed
