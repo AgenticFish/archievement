@@ -57,7 +57,7 @@ Invoke when the user wants to see progress, write a monthly self-tracking report
       <!-- archievement:status-table:end -->
       ```
 
-      One row per idea in `data.ideas`, preserving that order. The `Classification` cell is your own per-idea label (match the wording you use in the narrative below — "small unticketed", "medium unticketed", "needs brainstorm", etc.). The `Status` cell MUST be the literal `(pending)` placeholder — step 5e resolves it.
+      One row per idea in `data.ideas`, preserving that order. The `Classification` cell is your own per-idea label (match the wording you use in the narrative below — "small unticketed", "medium unticketed", "needs brainstorm", etc.). The `Status` cell MUST be the literal `(pending)` placeholder — step 5e resolves it. Resolution locates the entry currently carrying each row’s slug (across `idea`/`unticketed`/`ticketed`, via `slugOf`) and writes that entry’s real status (`todo` / `in-progress` / `done`); a slug found nowhere resolves to `removed`.
 
    e. **Freshen the table** before writing. Write the drafted body to a temp file and run a small driver that calls `freshenStatusTable(body, root)` from `lib/reports/prediction-status.js`, then use the returned string as the body for `writeReport`. Example one-liner (substitute concrete paths):
 
