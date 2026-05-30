@@ -59,7 +59,7 @@ lib/
   git.js                       remote detection + URL normalization (§2)
   frontmatter.js               YAML frontmatter R/W via gray-matter (§3)
   entries/                     canonical entry CRUD: path / create / read / update / list (§3)
-  promote/                     file → dir expansion + cross-bucket move with reciprocal links + orchestrate (§4)
+  promote/                     file → dir expansion + cross-bucket **graduate** (copy then delete source, slug preserved, no audit links) + orchestrate (§4)
   reports/                     deterministic anchors; summary / completion / prediction collectors; perf-review with hard category isolation; timestamped report writer (§5)
   hooks/                       SessionStart + PostToolUse hook logic, injectable for tests (§7)
 skills/                        4 user-facing skill markdowns (§6)
@@ -77,6 +77,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 - **One PR per plan section:** §1, §2, …, §8 each ship as a single PR. CLAUDE.md updates are added alongside or directly after each section.
 - **Anonymized examples in docs:** spec, plan, README, and code comments use generic placeholders (`project-a`, `~/archievement`, `PROJ-123`) rather than real company or personal identifiers.
 - **Frontmatter is English:** all YAML frontmatter in entry / report files is English. The body prose follows the user's language preference, set in `user-prefs.yml` (introduced in §2).
+- **idea is always file-layout** — promote graduates it into unticketed/ticketed for any dir-layout work.
 
 ## Execution status
 
@@ -85,7 +86,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §1 Foundation | ✅ Merged (PR #4) | 1-6 — plugin metadata, test infra, Prettier, CI, dir skeleton, tmp helper |
 | §2 Config | ✅ Merged (PR #6) | 7-10 — global / projects (with matcher) / user-prefs YAML R/W; git remote detection & normalization |
 | §3 Entries | ✅ Merged (PR #7) | 11-16 — frontmatter R/W; canonical entry paths; create / read / update (frontmatter, doc append, sibling doc) / list with filters |
-| §4 Promote | ✅ Merged (PR #8) | 17-19 — file-to-dir expansion; cross-bucket move with `promoted_from`/`promoted_to` audit links (source preserved); `promote()` orchestration |
+| §4 Promote | ✅ Merged (PR #8) | 17-19 — file-to-dir expansion; cross-bucket **graduate**: slug preserved, source **deleted** after content copied; no audit links; `promote()` orchestration |
 | §5 Reports | ✅ Merged (PR #9) | 20-25 — deterministic anchors (tickets / PRs / avg-days-to-done); summary, completion, prediction collectors; perf-review with phase-1 directory + phase-2 frontmatter category isolation; timestamped report writer |
 | §6 Skills | ✅ Merged (PR #10) | 26-29 — 4 user-facing SKILL.md (setup / record / promote / report) + shared frontmatter sanity test that auto-validates each skill |
 | §7 Hooks | ✅ Merged (PR #11) | 30-33 — hooks.json + cross-platform run-hook.cmd polyglot; SessionStart hook injecting `<archievement-context>` (project / category / active entries); PostToolUse hook nudging `<archievement-nudge>` after `gh pr create`; guard test for the executable bit |

@@ -124,6 +124,12 @@ archievement/
       2026-05-23-h1-2026-work.md
 ```
 
+**Filenames encode the slug as identity**: `<slug>.md` (or `<slug>/index.md`)
+for idea / unticketed / learning entries, and `<TICKET>-<slug>` for ticketed.
+This slug is what survives promotion — when an entry graduates into a new type
+or category, the slug in the destination filename is identical to the slug in
+the source filename.
+
 ### Frontmatter schema
 
 **Common fields** (every entry):
@@ -156,9 +162,13 @@ topic: rust-async
 
 # idea
 seed_date: 2026-05-23
-promoted_to: work/ticketed/PROJ-123         # written when promotion occurs
-promoted_from: work/idea/foo.md            # back-link on the promoted entry
+# (no audit-link fields — promote graduates the source and preserves the slug)
 ```
+
+**`idea` entries are always file-layout** — a single-file seed. The moment an
+idea needs brainstorm/plan/attachments it has graduated (via promote) into an
+unticketed/ticketed entry, which may be dir-layout. `createEntry` rejects a
+dir-layout idea.
 
 **Dual source of truth**: `category` and `type` live both in the frontmatter
 and in the directory path. The frontmatter is canonical; the path is a
@@ -244,17 +254,17 @@ Promotion flow:
 
 1. `AskUserQuestion` to confirm target type / category / `ticket_id` or slug.
 2. Physically move the file or directory to the new location.
-3. If the source is `layout: file` but the target needs `dir`, **auto-expand**:
-   move the original body into the new `index.md`; optionally split sections
+3. Update the target entry's frontmatter (`type`, `category`, `ticket_id` if
+   ticketed, `layout`).
+4. The slug is preserved across the move (`slugOf(target) === slugOf(source)`);
+   ticketed targets are named `<TICKET>-<slug>`.
+5. The source's content (and, for dir-layout sources, all sibling attachments)
+   is copied to the target. If the source is `layout: file` but the target
+   needs `dir`, the body is moved into `index.md` and sections may be split
    into `brainstorm.md`, `plan.md`, etc.
-4. Write reciprocal links: the new entry gets `promoted_from`, the original
-   gets `promoted_to`.
-5. The original entry **stays in place** (no move to a separate archive
-   directory) and its `status` is set to `done`. The `promoted_to` field
-   marks it as "completed by becoming something else." This is what causes
-   promotions to surface in the completion report (see §5.3).
-6. The original is **never deleted** (audit trail). If the user wants it gone,
-   they `rm` it themselves.
+6. The source is then **deleted (graduated)** — no audit-link fields are
+   written. The slug, recoverable from every filename, is the identity that
+   lets reports trace an idea to its graduated entry.
 
 ---
 
@@ -267,7 +277,7 @@ Promotion flow:
 | `arch-setup` | One-time, after install | Asks where `archievement/` lives and the default language; creates the directory skeleton and empty config files |
 | `arch-record` | The workhorse — distilling session content | Captures, dispatches to the right entry (creating one if needed), confirms scope, writes the file |
 | `arch-report` | Reviewing progress / writing a monthly self-tracking report / generating perf review draft | Read-only aggregation; writes to `reports/<date>-<kind>.md` |
-| `arch-promote` | Promoting `idea` / `unticketed`, or expanding `file` → `dir` | Same-category or cross-category move; writes reciprocal links |
+| `arch-promote` | Promoting `idea` / `unticketed`, or expanding `file` → `dir` | Graduate an entry: same- or cross-category; copies content then deletes the source; slug preserved; no audit links |
 | `arch-status` *(optional)* | Quickly changing status | May fold into `arch-record` |
 
 Skills communicate through the filesystem and hold no shared in-memory state.
@@ -386,12 +396,13 @@ Day 14  /arch-status   → in-progress → done
 Day 0   /arch-record   → type=idea → category=work → slug perf-review-auto-tag
                        → writes work/idea/perf-review-auto-tag.md
 Day 30  /arch-promote  → target type=unticketed → category=work
-                       → moves to work/unticketed/perf-review-tagging-poc/
+                       → graduates to work/unticketed/perf-review-auto-tag/
                        → expands file → dir (body into index.md + brainstorm.md)
-                       → old idea gets promoted_to, new entry gets promoted_from
+                       → source deleted; slug "perf-review-auto-tag" preserved
 Day 60  /arch-promote  → company opened a JIRA → target type=ticketed → ticket_id=PROJ-999
-                       → moves to work/ticketed/PROJ-999/
-                       → audit trail chains: idea → unticketed → ticketed
+                       → graduates to work/ticketed/PROJ-999-perf-review-auto-tag/
+                       → source deleted; slug preserved across the chain:
+                          idea → unticketed → ticketed, each step a graduation
 ```
 
 ---
@@ -446,9 +457,6 @@ in `global.yml`) get a `⚠️ stale` marker.
 ### 5.3 Completion (time range)
 
 Lists entries that transitioned to `done` within the range plus short summaries.
-**Promotion counts as a completion** — when an `idea` or `unticketed` is
-promoted to the next form, the promotion itself is a "thing finished" and shows
-up in the completion report, even if the new entry is still in-progress.
 
 ```markdown
 # Completed in the last 30 days (2026-04-23..2026-05-23)
@@ -460,10 +468,6 @@ up in the completion report, even if the new entry is still in-progress.
 
 ### Learning (1)
 - **rust-for-team-migration** — done 2026-05-19
-
-## Personal
-### Promoted from idea (1)
-- `streaming-md-parser` → `personal/unticketed/streaming-md-poc` on 2026-05-08
 ```
 
 ### 5.4 Prediction (idea-advancement suggestions)
