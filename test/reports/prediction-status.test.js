@@ -56,7 +56,7 @@ test("parseStatusTable returns null when anchors absent", () => {
   assert.equal(parseStatusTable(body), null);
 });
 
-test("resolveStatus: idea/todo returns the bare status", async () => {
+test("resolveStatus: a live idea returns its own status", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
       pointer: { category: "personal", type: "idea", id: "foo" },
@@ -70,17 +70,10 @@ test("resolveStatus: idea/todo returns the bare status", async () => {
   });
 });
 
-test("resolveStatus: promoted idea resolves to → ptr (target_status)", async () => {
+test("resolveStatus: graduated to unticketed (same slug) returns the unticketed status", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "foo" },
-      layout: "file",
-      extras: { promoted_to: "personal/unticketed/foo-impl" },
-      body: "",
-      now: NOW,
-    });
-    createEntry(root, {
-      pointer: { category: "personal", type: "unticketed", id: "foo-impl" },
+      pointer: { category: "personal", type: "unticketed", id: "foo" },
       layout: "file",
       extras: {},
       body: "",
@@ -88,32 +81,51 @@ test("resolveStatus: promoted idea resolves to → ptr (target_status)", async (
     });
     updateEntryFrontmatter(
       root,
-      { category: "personal", type: "unticketed", id: "foo-impl" },
+      { category: "personal", type: "unticketed", id: "foo" },
       { status: "done" },
     );
     const entries = listEntries(root, {});
-    assert.equal(resolveStatus(entries, "foo"), "→ personal/unticketed/foo-impl (done)");
+    assert.equal(resolveStatus(entries, "foo"), "done");
   });
 });
 
-test("resolveStatus: promoted to nonexistent target → ptr (gone)", async () => {
+test("resolveStatus: graduated to ticketed <TICKET>-<slug> is located by slug", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "foo" },
+      pointer: { category: "work", type: "ticketed", id: "EGA-1-foo" },
+      layout: "dir",
+      extras: { ticket_id: "EGA-1" },
+      body: "",
+      now: NOW,
+    });
+    updateEntryFrontmatter(
+      root,
+      { category: "work", type: "ticketed", id: "EGA-1-foo" },
+      { status: "in-progress" },
+    );
+    const entries = listEntries(root, {});
+    assert.equal(resolveStatus(entries, "foo"), "in-progress");
+  });
+});
+
+test("resolveStatus: slug found nowhere returns removed", async () => {
+  await withTmpDir(async (root) => {
+    const entries = listEntries(root, {});
+    assert.equal(resolveStatus(entries, "ghost"), "removed");
+  });
+});
+
+test("resolveStatus: exact slug match, not suffix substring", async () => {
+  await withTmpDir(async (root) => {
+    createEntry(root, {
+      pointer: { category: "personal", type: "unticketed", id: "add-prediction-table" },
       layout: "file",
-      extras: { promoted_to: "personal/unticketed/nonexistent" },
+      extras: {},
       body: "",
       now: NOW,
     });
     const entries = listEntries(root, {});
-    assert.equal(resolveStatus(entries, "foo"), "→ personal/unticketed/nonexistent (gone)");
-  });
-});
-
-test("resolveStatus: missing slug returns gone", async () => {
-  await withTmpDir(async (root) => {
-    const entries = listEntries(root, {});
-    assert.equal(resolveStatus(entries, "ghost"), "gone");
+    assert.equal(resolveStatus(entries, "prediction-table"), "removed");
   });
 });
 
