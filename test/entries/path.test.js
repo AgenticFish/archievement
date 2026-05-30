@@ -10,6 +10,7 @@ import {
   entryIndexPath,
   locateEntry,
   isDirOnlyType,
+  slugOf,
 } from "../../lib/entries/path.js";
 
 test("entryFilePath returns flat-file form", () => {
@@ -62,4 +63,23 @@ test("locateEntry returns null when neither exists", async () => {
     const located = locateEntry(root, { category: "work", type: "ticketed", id: "GONE" });
     assert.equal(located, null);
   });
+});
+
+test("slugOf: idea/unticketed/learning id is the slug verbatim", () => {
+  assert.equal(slugOf({ type: "idea", id: "foo-bar" }), "foo-bar");
+  assert.equal(slugOf({ type: "unticketed", id: "foo-bar" }), "foo-bar");
+  assert.equal(slugOf({ type: "learning", id: "magnifica-humanitas" }), "magnifica-humanitas");
+});
+
+test("slugOf: ticketed strips the leading TICKET- prefix", () => {
+  assert.equal(slugOf({ type: "ticketed", id: "EGA-5971-voice-refactor" }), "voice-refactor");
+  assert.equal(slugOf({ type: "ticketed", id: "PROJ-123-add-foo-bar" }), "add-foo-bar");
+});
+
+test("slugOf: ticketed slug may itself start with a digit", () => {
+  assert.equal(slugOf({ type: "ticketed", id: "PROJ-123-2023-retro" }), "2023-retro");
+});
+
+test("slugOf: legacy ticketed id with no slug suffix is returned unchanged", () => {
+  assert.equal(slugOf({ type: "ticketed", id: "EGA-5971" }), "EGA-5971");
 });
