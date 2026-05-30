@@ -5,6 +5,22 @@ All notable changes to the `archievement` plugin are recorded here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2026-05-29
+
+### Changed
+
+- **`promote` now graduates the source instead of preserving an audit trail.** Promotion copies the entry's content (and, for dir-layout sources, all sibling attachments) to the target, then **deletes the source**. The `promoted_from`/`promoted_to` reciprocal links are retired everywhere — the slug, preserved across the move, is the identity. This keeps `idea/` to live `todo` items only (graduated ideas leave the backlog) and makes the promote destination — already a content superset of the source — the single record. `completion` reports dropped their now-dead "Promoted from idea" bucket; graduated work appears as its real done entry. ([#27](https://github.com/AgenticFish/archievement/pull/27))
+- **Prediction status tables resolve by slug, not `promoted_to`.** Each row is resolved by locating the entry that currently carries its slug (across `idea`/`unticketed`/`ticketed`) and reporting that entry's real current status (`todo`/`in-progress`/`done`), or `removed` if the slug exists nowhere — strictly more truthful than the old frozen `→ <promoted_to>` cell. ([#27](https://github.com/AgenticFish/archievement/pull/27))
+
+### Added
+
+- **`slugOf(ptr)`** (`lib/entries/path.js`) — recovers the stable slug from any entry pointer. The slug is encoded in every filename: `<slug>.md` for idea/unticketed/learning, `<TICKET>-<slug>` for ticketed (the leading `^[A-Z][A-Z0-9]*-\d+-` ticket prefix is stripped). `promote()` enforces slug-preservation (`slugOf(from) === slugOf(to)`). ([#27](https://github.com/AgenticFish/archievement/pull/27))
+- **`idea` entries are now always file-layout.** `createEntry` rejects a dir-layout `idea`; dir-layout work belongs on the unticketed/ticketed entry an idea graduates into. ([#27](https://github.com/AgenticFish/archievement/pull/27))
+
+### Tests
+
+- 120 → 129. `slugOf` (+4 incl. legacy/no-suffix and digit-leading slug), `createEntry` idea-dir guard (+2), rewritten `moveEntry`/`promote` graduate + slug-invariant suites, `completion` no-bucket regression test, and `resolveStatus` rewritten to slug-locate / real-status / `removed`.
+
 ## [0.1.7] - 2026-05-29
 
 ### Added
