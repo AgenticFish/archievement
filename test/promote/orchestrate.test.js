@@ -6,11 +6,11 @@ import { withTmpDir } from "../helpers/tmp.js";
 import { createEntry } from "../../lib/entries/create.js";
 import { readEntry } from "../../lib/entries/read.js";
 import { promote } from "../../lib/promote/orchestrate.js";
-import { entryIndexPath } from "../../lib/entries/path.js";
+import { entryIndexPath, entryFilePath } from "../../lib/entries/path.js";
 
 const TODAY = "2026-05-23";
 
-test("promote(idea → ticketed) expands file to dir and writes links", async () => {
+test("promote(idea → ticketed) graduates: target at <TICKET>-<slug>, source deleted, no links", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
       pointer: { category: "work", type: "idea", id: "spark" },
@@ -23,7 +23,7 @@ test("promote(idea → ticketed) expands file to dir and writes links", async ()
     const result = promote(
       root,
       { category: "work", type: "idea", id: "spark" },
-      { category: "work", type: "ticketed", id: "PROJ-100" },
+      { category: "work", type: "ticketed", id: "PROJ-100-spark" },
       {
         now: TODAY,
         targetLayout: "dir",
@@ -33,19 +33,20 @@ test("promote(idea → ticketed) expands file to dir and writes links", async ()
 
     assert.equal(
       result.target.path,
-      entryIndexPath(root, { category: "work", type: "ticketed", id: "PROJ-100" }),
+      entryIndexPath(root, { category: "work", type: "ticketed", id: "PROJ-100-spark" }),
     );
-    const target = readEntry(root, { category: "work", type: "ticketed", id: "PROJ-100" });
+    const target = readEntry(root, { category: "work", type: "ticketed", id: "PROJ-100-spark" });
     assert.equal(target.data.ticket_id, "PROJ-100");
-    assert.equal(target.data.promoted_from, "work/idea/spark");
+    assert.equal(target.data.promoted_from, undefined);
     assert.match(target.body, /Spark of an idea/);
-    const source = readEntry(root, { category: "work", type: "idea", id: "spark" });
-    assert.equal(source.data.status, "done");
-    assert.equal(source.data.promoted_to, "work/ticketed/PROJ-100");
+    assert.equal(
+      existsSync(entryFilePath(root, { category: "work", type: "idea", id: "spark" })),
+      false,
+    );
   });
 });
 
-test("promote cross-category (personal idea → work ticketed)", async () => {
+test("promote cross-category (personal idea → work ticketed) graduates with slug preserved", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
       pointer: { category: "personal", type: "idea", id: "cross" },
@@ -57,11 +58,56 @@ test("promote cross-category (personal idea → work ticketed)", async () => {
     promote(
       root,
       { category: "personal", type: "idea", id: "cross" },
-      { category: "work", type: "ticketed", id: "PROJ-555" },
+      { category: "work", type: "ticketed", id: "PROJ-555-cross" },
       { now: TODAY, targetLayout: "dir", extras: { ticket_id: "PROJ-555", project: "project-a" } },
     );
-    const target = readEntry(root, { category: "work", type: "ticketed", id: "PROJ-555" });
+    const target = readEntry(root, { category: "work", type: "ticketed", id: "PROJ-555-cross" });
     assert.equal(target.data.category, "work");
-    assert.equal(target.data.promoted_from, "personal/idea/cross");
+    assert.equal(target.data.promoted_from, undefined);
+    assert.equal(
+      existsSync(entryFilePath(root, { category: "personal", type: "idea", id: "cross" })),
+      false,
+    );
+  });
+});
+
+test("promote rejects a target whose slug differs from the source slug", async () => {
+  await withTmpDir(async (root) => {
+    createEntry(root, {
+      pointer: { category: "personal", type: "idea", id: "spark" },
+      layout: "file",
+      extras: {},
+      body: "x",
+      now: "2026-05-29",
+    });
+    assert.throws(
+      () =>
+        promote(
+          root,
+          { category: "personal", type: "idea", id: "spark" },
+          { category: "personal", type: "unticketed", id: "renamed-spark" },
+          { now: "2026-05-29", targetLayout: "file" },
+        ),
+      /must preserve the slug/,
+    );
+  });
+});
+
+test("promote accepts a ticketed target named <TICKET>-<slug>", async () => {
+  await withTmpDir(async (root) => {
+    createEntry(root, {
+      pointer: { category: "personal", type: "idea", id: "spark" },
+      layout: "file",
+      extras: {},
+      body: "x",
+      now: "2026-05-29",
+    });
+    const res = promote(
+      root,
+      { category: "personal", type: "idea", id: "spark" },
+      { category: "work", type: "ticketed", id: "EGA-1-spark" },
+      { now: "2026-05-29", targetLayout: "dir", extras: { ticket_id: "EGA-1" } },
+    );
+    assert.equal(res.target.pointer.id, "EGA-1-spark");
   });
 });
