@@ -33,18 +33,31 @@ test("buildCompletion lists done entries within range, grouped by category × ty
   assert.doesNotMatch(md, /outside/);
 });
 
-test("buildCompletion surfaces promotions under 'Promoted from idea'", () => {
+test("buildCompletion has no 'Promoted from idea' bucket; graduated work shows as its entry", () => {
   const entries = [
-    entry({
-      category: "personal",
-      type: "idea",
-      id: "spark",
-      updated: "2026-05-08",
-      promoted_to: "personal/unticketed/spark-poc",
-    }),
+    {
+      pointer: { category: "personal", type: "unticketed", id: "spark" },
+      data: { category: "personal", type: "unticketed", status: "done", updated: "2026-05-10" },
+    },
   ];
-  const md = buildCompletion(entries, { from: "2026-05-01", to: "2026-05-23" });
-  assert.match(md, /## Personal/);
-  assert.match(md, /### Promoted from idea \(1\)/);
-  assert.match(md, /spark.*→.*personal\/unticketed\/spark-poc.*2026-05-08/);
+  const body = buildCompletion(entries, { from: "2026-05-01", to: "2026-05-31" });
+  assert.doesNotMatch(body, /Promoted from idea/);
+  assert.match(body, /\*\*spark\*\* — done 2026-05-10/);
+
+  // A done idea carrying promoted_to must not surface under any heading
+  const ideaEntries = [
+    {
+      pointer: { category: "work", type: "idea", id: "big-idea" },
+      data: {
+        category: "work",
+        type: "idea",
+        status: "done",
+        updated: "2026-05-15",
+        promoted_to: "work/unticketed/big-idea",
+      },
+    },
+  ];
+  const ideaBody = buildCompletion(ideaEntries, { from: "2026-05-01", to: "2026-05-31" });
+  assert.doesNotMatch(ideaBody, /Promoted from idea/);
+  assert.doesNotMatch(ideaBody, /big-idea/);
 });

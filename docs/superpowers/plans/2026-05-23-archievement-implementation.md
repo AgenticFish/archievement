@@ -2059,6 +2059,8 @@ git commit -m "Add entry listing with filters"
 
 ## Section 4 — Promotion
 
+> **Superseded (2026-05-29):** the `promoted_from`/`promoted_to` audit-link behavior described in this section was replaced by the *graduate* model — promote now copies content then **deletes** the source, preserving the slug, and writes no audit links. See [`2026-05-29-graduate-promote-slug-identity.md`](2026-05-29-graduate-promote-slug-identity.md) for the current design. This section is retained as a historical record of the original build.
+
 ### Task 17: `lib/promote/expand.js` — file → dir expansion
 
 **Files:**

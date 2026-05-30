@@ -75,3 +75,32 @@ test("createEntry refuses to overwrite an existing entry", async () => {
     );
   });
 });
+
+test("createEntry rejects dir-layout for type idea", async () => {
+  await withTmpDir(async (root) => {
+    assert.throws(
+      () =>
+        createEntry(root, {
+          pointer: { category: "personal", type: "idea", id: "seed" },
+          layout: "dir",
+          extras: {},
+          body: "",
+          now: "2026-05-29",
+        }),
+      /idea entries must be file-layout/,
+    );
+  });
+});
+
+test("createEntry still allows file-layout for type idea", async () => {
+  await withTmpDir(async (root) => {
+    const res = createEntry(root, {
+      pointer: { category: "personal", type: "idea", id: "seed" },
+      layout: "file",
+      extras: {},
+      body: "",
+      now: "2026-05-29",
+    });
+    assert.equal(res.layout, "file");
+  });
+});
