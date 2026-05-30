@@ -1,6 +1,6 @@
 ---
 name: promote
-description: Promote an archievement entry — idea → ticketed/unticketed, or unticketed → ticketed, possibly across categories. Handles file → dir expansion and writes reciprocal audit-trail links.
+description: Promote (graduate) an archievement entry — idea → ticketed/unticketed, or unticketed → ticketed, possibly across categories. Preserves the slug, deletes the source, handles file → dir expansion.
 ---
 
 # archievement:promote
@@ -27,17 +27,18 @@ Invoke when an existing entry needs to graduate to a new form:
 3. **Ask the target.** AskUserQuestion sequentially:
    - Target type: `ticketed / unticketed / learning / idea` (default to a sensible next step based on source type).
    - Target category: `work / personal` (default to source category).
-   - Target id or slug. For `ticketed`, ask for the ticket ID. For others, propose a kebab-case slug derived from the source title; let the user edit.
+   - Target id: **the slug is preserved**. For `ticketed`, ask for the ticket ID and build the id as `<TICKET>-<source-slug>` (e.g. source `voice-refactor` + ticket `EGA-5971` → `EGA-5971-voice-refactor`). For every other type, the target id **equals the source slug** — do not rename. `promote()` will reject a target whose slug differs.
    - Target layout: `dir / file` — required if source is file-layout and the user wants dir.
 
-4. **Show a plan.** Print: "Promoting `<source>` → `<target>`. The source will be marked `done`, with `promoted_to: <target>`. The target gets `promoted_from: <source>`." AskUserQuestion `Proceed / Cancel`.
+4. **Show a plan.** Print: "Promoting (graduating) `<source>` → `<target>`. The source will be **deleted**; its content (and any dir-layout attachments) moves to the target, which keeps the same slug." AskUserQuestion `Proceed / Cancel`.
 
 5. **Execute.** Call `promote()` from `lib/promote/orchestrate.js`. Pass `now = today (YYYY-MM-DD)`, `targetLayout`, and any type-specific `extras` (e.g., `ticket_id`, `project`).
 
-6. **Report.** Tell the user the new entry's path and remind them the source is preserved (audit trail), not deleted.
+6. **Report.** Tell the user the new entry's path and that the source was graduated (deleted) — its content now lives at the target.
 
 ## Invariants
 
-- Never overwrite an existing target — orchestrate.js refuses; surface the error and ask the user for a different id.
-- Never delete the source. If the user wants it gone, instruct them to `rm` it manually.
-- `extras` must include `ticket_id` when target type is `ticketed`; otherwise the data will be inconsistent. Ask if missing.
+- Never overwrite an existing target — orchestrate.js refuses; surface the error and ask for a different id.
+- **promote preserves the slug.** `slugOf(target) === slugOf(source)`; ticketed targets are named `<TICKET>-<slug>`. orchestrate.js enforces this.
+- **promote graduates the source: it is deleted, not preserved.** Content (and dir attachments) is copied to the target first, so nothing is lost. No `promoted_from`/`promoted_to` links are written.
+- `extras` must include `ticket_id` when target type is `ticketed`; ask if missing.
