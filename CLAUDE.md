@@ -62,8 +62,8 @@ lib/
   promote/                     file → dir expansion + cross-bucket **graduate** (copy then delete source, slug preserved, no audit links) + orchestrate (§4)
   reports/                     deterministic anchors; summary / completion / prediction collectors; perf-review with hard category isolation; timestamped report writer (§5)
   hooks/                       SessionStart + PostToolUse hook logic, injectable for tests (§7)
-skills/                        4 user-facing skill markdowns (§6)
-  setup / record / promote / report
+skills/                        5 user-facing skill markdowns (§6, §9)
+  setup / record / promote / report / project-setup
 test/                          mirrors lib/ structure
   helpers/tmp.js               withTmpDir(fn) — isolated tmp dirs for filesystem tests
   skills.test.js               shared frontmatter sanity test for all skills (§6)
@@ -91,5 +91,6 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §6 Skills | ✅ Merged (PR #10) | 26-29 — 4 user-facing SKILL.md (setup / record / promote / report) + shared frontmatter sanity test that auto-validates each skill |
 | §7 Hooks | ✅ Merged (PR #11) | 30-33 — hooks.json + cross-platform run-hook.cmd polyglot; SessionStart hook injecting `<archievement-context>` (project / category / active entries); PostToolUse hook nudging `<archievement-nudge>` after `gh pr create`; guard test for the executable bit |
 | §8 Polish | ✅ Merged (PR #12) | 34-36 — README with install/usage/design pointer; manual E2E smoke test (user-driven, no commit); final consistency review pass |
+| §9 project-setup skill | ✅ Shipped | follow-up — updateProject / removeProject / removeIgnore helpers + project-setup skill (cwd-centric show/configure/ignore) + SessionStart nudge names the skill |
 
-All 8 sections shipped. The plan in `docs/superpowers/plans/2026-05-23-archievement-implementation.md` is complete.
+All 8 plan sections plus the §9 project-setup follow-up shipped. The plan in `docs/superpowers/plans/2026-05-23-archievement-implementation.md` is complete.
