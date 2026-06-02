@@ -14,6 +14,7 @@ import {
   addProject,
   addIgnore,
   updateProject,
+  removeProject,
   rememberLanguage,
   DEFAULT_CONFIG,
 } from "../../lib/config/plugin.js";
@@ -429,6 +430,28 @@ test("updateProject returns config unchanged when no slug matches", () => {
   };
   const next = updateProject(cfg, "missing", { category: "personal" });
   assert.deepEqual(next.projects, cfg.projects);
+});
+
+test("removeProject filters out the slug-matching project", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    projects: [
+      { match: { type: "path", path: "/p" }, slug: "a", category: "work" },
+      { match: { type: "path", path: "/q" }, slug: "b", category: "personal" },
+    ],
+  };
+  const next = removeProject(cfg, "a");
+  assert.equal(next.projects.length, 1);
+  assert.equal(next.projects[0].slug, "b");
+});
+
+test("removeProject returns config unchanged when no slug matches", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    projects: [{ match: { type: "path", path: "/p" }, slug: "a", category: "work" }],
+  };
+  const next = removeProject(cfg, "missing");
+  assert.equal(next.projects.length, 1);
 });
 
 test("rememberLanguage appends without duplicating", () => {
