@@ -36,6 +36,7 @@ test("runSessionStart injects 'unregistered' when project not in config", async 
       });
       assert.match(result.additionalContext, /<archievement-context>/);
       assert.match(result.additionalContext, /unregistered project/);
+      assert.match(result.additionalContext, /\/archievement:project-setup/);
     });
   });
 });
