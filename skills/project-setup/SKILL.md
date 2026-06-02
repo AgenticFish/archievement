@@ -62,7 +62,7 @@ descriptions reflecting the current cwd state:
 | Option | Description shown |
 |---|---|
 | **show** | List all registered projects + the ignore list (read-only). |
-| **configure** | Register this project (if `unknown`) or modify/remove it (if `match`). |
+| **configure** | Register this project (if `unknown`) or modify/remove it (if `match`). If `ignored`, tell the user this directory is on the ignore list and to use **ignore** to unignore it first. |
 | **ignore** | Add this directory to the ignore list (if not ignored) or remove it (if `ignored`). |
 
 ### show
