@@ -5,6 +5,21 @@ All notable changes to the `archievement` plugin are recorded here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-01
+
+### Added
+
+- **New `project-setup` skill** (`/archievement:project-setup`) — the 5th user-facing skill. A cwd-centric tool to view, register, modify, or ignore the current project's config (slug / category / language), closing the gap where the unified `${CLAUDE_PLUGIN_DATA}/config.yml` could previously only be hand-edited. It presents a `show` / `configure` / `ignore` menu with smart upsert: `configure` registers the cwd when it is unknown and modifies (or removes) it when it already matches, while `ignore` toggles the cwd on the ignore list. Distinct from the one-time global `setup` skill. ([#29](https://github.com/AgenticFish/archievement/pull/29))
+- **Three pure config helpers** in `lib/config/plugin.js`: `updateProject(config, slug, patch)`, `removeProject(config, slug)`, and `removeIgnore(config, probe)`. `removeIgnore` is probe-based and reuses the private `matcherMatches`, making unignore the exact inverse of `matchProject`'s `ignored` classification. ([#29](https://github.com/AgenticFish/archievement/pull/29))
+
+### Changed
+
+- **The SessionStart unregistered-project nudge now names the skill** — it points the user at `/archievement:project-setup` to register or ignore the current directory, instead of a generic "if any archievement skill is invoked" hint. ([#29](https://github.com/AgenticFish/archievement/pull/29))
+
+### Tests
+
+- 129 → 136. New `updateProject` / `removeProject` / `removeIgnore` unit tests (merge / no-op, filter / no-op, probe-match by path and git-remote), plus a session-start assertion that the nudge names the skill. `test/skills.test.js` auto-covers the new `project-setup` skill.
+
 ## [0.1.8] - 2026-05-29
 
 ### Changed
