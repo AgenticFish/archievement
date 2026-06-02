@@ -13,6 +13,9 @@ import {
   matchProject,
   addProject,
   addIgnore,
+  updateProject,
+  removeProject,
+  removeIgnore,
   rememberLanguage,
   DEFAULT_CONFIG,
 } from "../../lib/config/plugin.js";
@@ -402,6 +405,85 @@ test("addIgnore appends to ignore list", () => {
   const next = addIgnore(cfg, { match: { type: "path", path: "/tmp/x" } });
   assert.equal(next.ignore.length, 1);
   assert.equal(next.ignore[0].match.path, "/tmp/x");
+});
+
+// --- updateProject / removeProject / removeIgnore -------------------------
+
+test("updateProject merges a patch into the slug-matching project", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    projects: [
+      { match: { type: "path", path: "/p" }, slug: "a", category: "work", language: "en" },
+      { match: { type: "path", path: "/q" }, slug: "b", category: "personal" },
+    ],
+  };
+  const next = updateProject(cfg, "a", { category: "personal", language: "zh" });
+  assert.equal(next.projects[0].category, "personal");
+  assert.equal(next.projects[0].language, "zh");
+  assert.equal(next.projects[0].slug, "a", "slug is preserved");
+  assert.equal(next.projects[1].category, "personal", "other projects untouched");
+});
+
+test("updateProject returns config unchanged when no slug matches", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    projects: [{ match: { type: "path", path: "/p" }, slug: "a", category: "work" }],
+  };
+  const next = updateProject(cfg, "missing", { category: "personal" });
+  assert.deepEqual(next.projects, cfg.projects);
+});
+
+test("removeProject filters out the slug-matching project", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    projects: [
+      { match: { type: "path", path: "/p" }, slug: "a", category: "work" },
+      { match: { type: "path", path: "/q" }, slug: "b", category: "personal" },
+    ],
+  };
+  const next = removeProject(cfg, "a");
+  assert.equal(next.projects.length, 1);
+  assert.equal(next.projects[0].slug, "b");
+});
+
+test("removeProject returns config unchanged when no slug matches", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    projects: [{ match: { type: "path", path: "/p" }, slug: "a", category: "work" }],
+  };
+  const next = removeProject(cfg, "missing");
+  assert.equal(next.projects.length, 1);
+});
+
+test("removeIgnore filters the ignore entry matching a path probe", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    ignore: [
+      { match: { type: "path", path: "/tmp/a" } },
+      { match: { type: "path", path: "/tmp/b" } },
+    ],
+  };
+  const next = removeIgnore(cfg, { remote: null, cwd: "/tmp/a" });
+  assert.equal(next.ignore.length, 1);
+  assert.equal(next.ignore[0].match.path, "/tmp/b");
+});
+
+test("removeIgnore filters the ignore entry matching a git-remote probe", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    ignore: [{ match: { type: "git-remote", url: "github.com/me/x" } }],
+  };
+  const next = removeIgnore(cfg, { remote: "github.com/me/x", cwd: "/anywhere" });
+  assert.equal(next.ignore.length, 0);
+});
+
+test("removeIgnore returns config unchanged when nothing matches the probe", () => {
+  const cfg = {
+    ...DEFAULT_CONFIG,
+    ignore: [{ match: { type: "path", path: "/tmp/a" } }],
+  };
+  const next = removeIgnore(cfg, { remote: null, cwd: "/tmp/other" });
+  assert.equal(next.ignore.length, 1);
 });
 
 test("rememberLanguage appends without duplicating", () => {
