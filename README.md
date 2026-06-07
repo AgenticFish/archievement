@@ -32,6 +32,7 @@ If you were on an earlier version that used `~/.archievementrc` or `<root>/confi
 - `/archievement:promote` — promote an idea or unticketed entry to its next form, possibly across categories.
 - `/archievement:report` — generate `summary`, `completion`, `prediction`, or `perf-review` reports.
 - `/archievement:project-setup` — view, register, modify, or ignore the current project's config (slug, category, language).
+- `/archievement:find` — locate or recall an archieved entry by filename/slug, topic/keyword, or frontmatter (read-only).
 
 ## Data model
 
