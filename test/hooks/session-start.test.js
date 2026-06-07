@@ -37,6 +37,7 @@ test("runSessionStart injects 'unregistered' when project not in config", async 
       assert.match(result.additionalContext, /<archievement-context>/);
       assert.match(result.additionalContext, /unregistered project/);
       assert.match(result.additionalContext, /\/archievement:project-setup/);
+      assert.ok(result.additionalContext.includes(`archievement root: ${root}`));
     });
   });
 });
@@ -76,6 +77,7 @@ test("runSessionStart injects active entries when project is registered", async 
       assert.match(result.additionalContext, /project: project-a/);
       assert.match(result.additionalContext, /category: work/);
       assert.match(result.additionalContext, /PROJ-1 \(todo\)/);
+      assert.ok(result.additionalContext.includes(`archievement root: ${root}`));
     });
   });
 });
