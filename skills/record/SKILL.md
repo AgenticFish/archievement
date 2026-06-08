@@ -48,12 +48,16 @@ Before any prompting, read the runtime state:
 3. **If creating a new entry:**
    a. AskUserQuestion category. If cwd context says work or personal, offer that as default; otherwise: `work / personal`.
    b. AskUserQuestion type: `ticketed / unticketed / learning / idea`.
-   c. For `ticketed`: ask the ticket ID (free-form). For others: ask a slug (kebab-case).
+   c. For `ticketed`: ask the ticket ID (free-form, e.g. `EGA-5971`); the **entry-slug** is `<TICKET>-<kebab-slug>` (ask for the kebab-slug too, or derive it from the content with the user's confirmation). For other types: ask a kebab-case entry-slug.
+   c2. **Determine the project segment.** If the SessionStart `<archievement-context>` block carries a `project:` slug, use it. Otherwise use the literal `tbd` (the "unclassified for now" placeholder). Do NOT invent a project name.
+   c3. **Build the id** with `makeId(project, entrySlug)` from `lib/entries/path.js` — never hand-concatenate. Example:
+       `node -e "import('${CLAUDE_PLUGIN_ROOT}/lib/entries/path.js').then(({ makeId }) => process.stdout.write(makeId('PROJECT', 'ENTRY_SLUG')))"`
+       For a ticketed entry the second arg is the full `<TICKET>-<slug>` entry-slug, e.g. `makeId('egs-mobile', 'EGA-5971-voice-refactor')` → `egs-mobile_EGA-5971-voice-refactor`. For no project: `makeId('', 'foo')` → `tbd_foo`.
    d. AskUserQuestion layout (skip for `idea` — always file): `dir (complex, expandable) / file (lightweight, expandable later)`.
    e. AskUserQuestion: "What's the initial doc?" options `brainstorm / plan / I'll just create the entry with no body yet`.
    f. Scope question (same as above).
    g. Draft body.
-   h. Confirm + save: call `createEntry` from `lib/entries/create.js`.
+   h. Confirm + save: call `createEntry` from `lib/entries/create.js`. Pass the id built in step c3, and set `extras.project` to the **same** project slug used in the id's project segment (or omit/`tbd` when unclassified) — the filename segment mirrors the authoritative frontmatter `project`.
 
 4. **Final report.** Tell the user the on-disk path of the file you wrote and the new entry's status.
 
@@ -63,6 +67,7 @@ Before any prompting, read the runtime state:
 - **Never invent ticket IDs, slugs, project names, or content.** Always pull from session context or AskUserQuestion.
 - **Status changes are always explicit.** The skill never sets status to `in-progress` or `done` based on inference; it only changes status when the user picks an option.
 - **Frontmatter is always English.** Body prose follows the resolved language.
+- **Every new id is `<project>_<entry-slug>`, built via `makeId`.** The project segment mirrors frontmatter `project` (or `tbd` when unclassified). Never put an `_` inside either segment — `makeId` rejects it.
 
 ## Cross-skill calls
 

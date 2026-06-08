@@ -51,6 +51,7 @@ Decompose the natural-language query into three kinds of signal:
 
 - **Filename / slug keywords** — prefer English tokens likely to appear in file
   names (e.g. `mcp`, `transport`).
+  (Filenames are encoded `<project>_<entry-slug>.md`, so a Glob like `**/*find-skill*.md` matches `archievement-plugin_find-skill.md`. A query naming a project — "the archievement-plugin idea about X" — maps the project to the `<project>_` prefix.)
 - **Frontmatter hints** — map prose to filters: "idea / 想法" → `type: idea`;
   "learning / 学习笔记" → `type: learning`; "done / 做完的" → `status: done`;
   "work" / "personal" → category; a known project name → `project`.
@@ -95,6 +96,9 @@ rank higher. This is your judgment — there is no computed score.
   snippet, then AskUserQuestion: "Which one do you want to open?"
 - **Zero hits** → tell the user nothing matched under the root, show the few
   closest candidates (if any), and suggest broadening the search terms.
+- When several hits span different projects, label each with its project
+  (the `<project>_` prefix of the filename, available via `projectOf` from
+  `lib/entries/path.js`) so the user can disambiguate by ownership.
 
 ## Invariants
 

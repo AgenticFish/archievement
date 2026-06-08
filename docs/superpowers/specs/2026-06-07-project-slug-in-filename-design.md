@@ -1,6 +1,6 @@
 ---
 title: Project slug in entry filenames — `<project>_<slug>` id encoding
-status: draft (pending user review)
+status: implemented (2026-06-08)
 date: 2026-06-07
 authors: [irene.yu, claude]
 ---
