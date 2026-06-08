@@ -5,6 +5,25 @@ All notable changes to the `archievement` plugin are recorded here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-08
+
+### Added
+
+- **New `find` skill** (`/archievement:find`) — the 6th user-facing skill. Locates or recalls an archieved entry by filename/slug (Glob), topic/keyword (full-text Grep over `work/` + `personal/`, `reports/` excluded), or frontmatter facets (`listEntries`). It **always resolves the archievement root first** and searches inside it — never the cwd or the plugin source repo — fixing a class of bug where a recall request grepped the wrong tree. Read-only; hands off to `record`/`promote` for edits. The SessionStart hook now also injects the `archievement root:` line into its match/unregistered context. ([#31](https://github.com/AgenticFish/archievement/pull/31))
+- **Project slug encoded in every entry id: `<project-slug>_<entry-slug>`.** A filename now names its owning project at a glance (e.g. `personal/unticketed/archievement-plugin_find-skill.md`, `work/ticketed/egs-mobile_EGA-5971-voice-refactor.md`); an entry with no project uses the literal `tbd` placeholder. The `_` is the sole delimiter (exactly once; neither segment contains `_`). New helpers in `lib/entries/path.js`: `makeId(projectSlug, entrySlug)` (the sole id-construction point — defaults a falsy project to `tbd`, throws on an `_` in either segment) and `projectOf(ptr)` (reads the project segment). The directory layout (`<category>/<type>/`) is unchanged — project lives in the filename, not a directory level. Frontmatter `project` stays authoritative; the filename segment mirrors it. ([#34](https://github.com/AgenticFish/archievement/pull/34))
+
+### Changed
+
+- **`slugOf` is now a two-stage parse.** It strips the `<project-slug>_` segment first, then (for `ticketed`) the `^[A-Z][A-Z0-9]*-\d+-` ticket prefix, recovering the cross-promote entry-slug. Because the project segment is stripped before comparison, **`promote` now preserves the entry-slug while allowing the project segment to be filled in or changed** on graduation (e.g. a `tbd_` idea acquires its real project). `orchestrate.js` and `prediction-status.js` are unchanged — they inherit the new behavior through `slugOf`. The `record` / `promote` / `find` skill prose is updated to build and describe the new id shape. ([#34](https://github.com/AgenticFish/archievement/pull/34))
+
+### Removed
+
+- **Legacy config-migration path.** The one-time migration that absorbed three pre-1.0 config sources (`~/.archievementrc` and `<root>/config/{global,projects,user-prefs}.yml`) into the unified `${CLAUDE_PLUGIN_DATA}/config.yml` is gone (`applyLegacyMigrations`, `readYaml`, `LEGACY_ROOT_CONFIG_FILES`, and the `legacyRcPath` config option). Those formats were superseded in #17/#19 and the migration has long since run for every live install. `loadConfig` is now a straight read-`config.yml` + merge-defaults function (−137 lines). This is a clean break — there is no fallback for the old config shapes or for old bare-slug entry ids; pre-convention on-disk data is out of scope and is not migrated. ([#33](https://github.com/AgenticFish/archievement/pull/33))
+
+### Tests
+
+- 136 → 137. Rewrote the `slugOf` suite for the two-stage `<project>_<slug>` encoding and added `projectOf` / `makeId` / promote-slug-preservation-across-project-change suites; updated the promote and prediction-status fixtures to the new id shape. Removed the 9 config-migration tests. `test/skills.test.js` auto-covers the new `find` skill.
+
 ## [0.2.0] - 2026-06-01
 
 ### Added
