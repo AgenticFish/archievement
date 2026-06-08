@@ -65,21 +65,31 @@ test("locateEntry returns null when neither exists", async () => {
   });
 });
 
-test("slugOf: idea/unticketed/learning id is the slug verbatim", () => {
-  assert.equal(slugOf({ type: "idea", id: "foo-bar" }), "foo-bar");
-  assert.equal(slugOf({ type: "unticketed", id: "foo-bar" }), "foo-bar");
-  assert.equal(slugOf({ type: "learning", id: "magnifica-humanitas" }), "magnifica-humanitas");
+test("slugOf: non-ticketed strips only the project segment", () => {
+  assert.equal(slugOf({ type: "idea", id: "tbd_mcp-transport-stdio-vs-http" }), "mcp-transport-stdio-vs-http");
+  assert.equal(slugOf({ type: "unticketed", id: "archievement-plugin_find-skill" }), "find-skill");
+  assert.equal(slugOf({ type: "learning", id: "tbd_magnifica-humanitas" }), "magnifica-humanitas");
 });
 
-test("slugOf: ticketed strips the leading TICKET- prefix", () => {
-  assert.equal(slugOf({ type: "ticketed", id: "EGA-5971-voice-refactor" }), "voice-refactor");
-  assert.equal(slugOf({ type: "ticketed", id: "PROJ-123-add-foo-bar" }), "add-foo-bar");
+test("slugOf: ticketed strips the project segment then the TICKET- prefix", () => {
+  assert.equal(slugOf({ type: "ticketed", id: "egs-mobile_EGA-5971-voice-refactor" }), "voice-refactor");
+  assert.equal(slugOf({ type: "ticketed", id: "archievement-plugin_PROJ-123-add-foo-bar" }), "add-foo-bar");
 });
 
 test("slugOf: ticketed slug may itself start with a digit", () => {
-  assert.equal(slugOf({ type: "ticketed", id: "PROJ-123-2023-retro" }), "2023-retro");
+  assert.equal(slugOf({ type: "ticketed", id: "egs-mobile_PROJ-123-2023-retro" }), "2023-retro");
 });
 
-test("slugOf: legacy ticketed id with no slug suffix is returned unchanged", () => {
-  assert.equal(slugOf({ type: "ticketed", id: "EGA-5971" }), "EGA-5971");
+test("slugOf: ticketed id with no slug suffix returns the bare ticket", () => {
+  // project stripped → EGA-5971; ticket-prefix regex needs a trailing slug to strip,
+  // finds none, so EGA-5971 is returned unchanged.
+  assert.equal(slugOf({ type: "ticketed", id: "egs-mobile_EGA-5971" }), "EGA-5971");
+});
+
+test("slugOf: tbd project segment is stripped like any other", () => {
+  assert.equal(slugOf({ type: "idea", id: "tbd_foo" }), "foo");
+});
+
+test("slugOf: an entry-slug containing hyphens survives intact", () => {
+  assert.equal(slugOf({ type: "unticketed", id: "archievement-plugin_a-b-c-d" }), "a-b-c-d");
 });
