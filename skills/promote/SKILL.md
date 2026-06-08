@@ -1,6 +1,6 @@
 ---
 name: promote
-description: Promote (graduate) an archievement entry — idea → ticketed/unticketed, or unticketed → ticketed, possibly across categories. Preserves the slug, deletes the source, handles file → dir expansion.
+description: Promote (graduate) an archievement entry — idea → ticketed/unticketed, or unticketed → ticketed, possibly across categories. Preserves the entry-slug, deletes the source, handles file → dir expansion.
 ---
 
 # archievement:promote
