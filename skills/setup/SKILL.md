@@ -20,7 +20,6 @@ Create the archievement folder (content only) and write the unified plugin confi
    ```
 
    - If the output is non-empty AND the directory exists, AskUserQuestion: "archievement is already set up at `<path>`. Re-initialize?" options `Keep existing` / `Re-run setup`. Stop if they choose Keep.
-   - If a legacy `~/.archievementrc` or legacy `<root>/config/*.yml` was present, the resolver call already migrated everything to the unified plugin-data config — surface that to the user in the final confirmation.
 
 2. **Ask where the archievement folder goes.** AskUserQuestion: "Where should the archievement folder live?" options `~/archievement (suggested)` / `specify a different path`. The user must pick — there is no silent default. If they pick "specify", prompt the user to type the path. Expand `~`.
 
@@ -57,7 +56,6 @@ Create the archievement folder (content only) and write the unified plugin confi
 6. **Confirm completion.** Tell the user:
    - Where the archievement folder was written (content only — no `config/` subdir anymore)
    - Where the plugin config was written (`${CLAUDE_PLUGIN_DATA}/config.yml`)
-   - If a legacy `~/.archievementrc` or `<root>/config/*.yml` was migrated and removed, mention it (the resolver in step 1 already did this transparently)
    - The next step (probably `/archievement:record`)
 
 ## Edge cases

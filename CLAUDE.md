@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `archievement` is a Claude Code plugin: a private work-memory archiver. It takes content from a Claude Code session (brainstorms, plans, PR summaries, learning logs, ideas) and writes it as structured markdown under a user-chosen root directory (suggested `~/archievement/`). It also generates progress reports and personal performance-review drafts.
 
-All plugin runtime config — root path, language preferences, stale-days threshold, registered projects, ignore patterns — lives in a single unified `${CLAUDE_PLUGIN_DATA}/config.yml`. Read it via `lib/config/plugin.js`'s `loadConfig()` (or `resolveArchievementRoot()` for just the root). Claude Code (>= 2.1.78) injects `CLAUDE_PLUGIN_DATA` and auto-creates that directory per plugin. There is no silent default: if the config is missing, every skill stops and instructs the user to run `/archievement:setup`. One-time lazy migration handles users on older versions (legacy `~/.archievementrc` pointer and/or legacy `<root>/config/*.yml` files); migrated files are unlinked, and `<root>/config/` is removed if empty. The archievement root itself contains content only: `work/`, `personal/`, `reports/`.
+All plugin runtime config — root path, language preferences, stale-days threshold, registered projects, ignore patterns — lives in a single unified `${CLAUDE_PLUGIN_DATA}/config.yml`. Read it via `lib/config/plugin.js`'s `loadConfig()` (or `resolveArchievementRoot()` for just the root). Claude Code (>= 2.1.78) injects `CLAUDE_PLUGIN_DATA` and auto-creates that directory per plugin. There is no silent default: if the config is missing, every skill stops and instructs the user to run `/archievement:setup`. The archievement root itself contains content only: `work/`, `personal/`, `reports/`.
 
 The core design rule is **"sink, not source"**: the plugin consumes context that other tools / MCPs / the user have already loaded into the session. It does **not** call external APIs (no JIRA, GitHub, Slack, etc.). This makes the plugin vendor-neutral, dependency-free, and immune to expired tokens or rate limits.
 
@@ -55,7 +55,7 @@ package.json                   ESM, Node >=20, deps + scripts
 docs/superpowers/              spec + plan (hand-formatted markdown — Prettier ignores *.md)
 hooks/                         hooks.json + run-hook.cmd polyglot + session-start / post-tool-use-gh-pr-create bash wrappers (§7)
 lib/
-  config/                      global.yml / projects.yml / user-prefs.yml R/W (§2)
+  config/                      unified config.yml R/W + project matcher (§2)
   git.js                       remote detection + URL normalization (§2)
   frontmatter.js               YAML frontmatter R/W via gray-matter (§3)
   entries/                     canonical entry CRUD: path / create / read / update / list (§3)
@@ -76,7 +76,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 - **PR titles:** lead with an imperative verb (`Add` / `Fix` / `Refactor` / `Remove`). No gerunds (`Adding…`), no conventional-commits prefix (`feat:`).
 - **One PR per plan section:** §1, §2, …, §8 each ship as a single PR. CLAUDE.md updates are added alongside or directly after each section.
 - **Anonymized examples in docs:** spec, plan, README, and code comments use generic placeholders (`project-a`, `~/archievement`, `PROJ-123`) rather than real company or personal identifiers.
-- **Frontmatter is English:** all YAML frontmatter in entry / report files is English. The body prose follows the user's language preference, set in `user-prefs.yml` (introduced in §2).
+- **Frontmatter is English:** all YAML frontmatter in entry / report files is English. The body prose follows the user's language preference, set in the unified `${CLAUDE_PLUGIN_DATA}/config.yml` (introduced in §2).
 - **idea is always file-layout** — promote graduates it into unticketed/ticketed for any dir-layout work.
 
 ## Execution status

@@ -15,7 +15,6 @@ test("runSessionStart returns empty additionalContext when archievement is not s
       cwd: tmpHome,
       now: TODAY,
       pluginConfigPath: join(tmpHome, "plugin-data", "config.yml"),
-      legacyRcPath: join(tmpHome, ".archievementrc"),
       getProjectProbe: () => ({ remote: null, cwd: tmpHome }),
     });
     assert.equal(result.additionalContext, "");
@@ -31,7 +30,6 @@ test("runSessionStart injects 'unregistered' when project not in config", async 
         cwd: "/some/random/path",
         now: TODAY,
         pluginConfigPath,
-        legacyRcPath: join(tmpHome, ".archievementrc"),
         getProjectProbe: () => ({ remote: "github.com/me/new", cwd: "/some/random/path" }),
       });
       assert.match(result.additionalContext, /<archievement-context>/);
@@ -71,7 +69,6 @@ test("runSessionStart injects active entries when project is registered", async 
         cwd: "/wherever",
         now: TODAY,
         pluginConfigPath,
-        legacyRcPath: join(tmpHome, ".archievementrc"),
         getProjectProbe: () => ({ remote: "github.com/me/project-a", cwd: "/wherever" }),
       });
       assert.match(result.additionalContext, /project: project-a/);
@@ -98,7 +95,6 @@ test("runSessionStart stays silent for explicitly-ignored cwd", async () => {
         cwd: "/tmp/ignored",
         now: TODAY,
         pluginConfigPath,
-        legacyRcPath: join(tmpHome, ".archievementrc"),
         getProjectProbe: () => ({ remote: null, cwd: "/tmp/ignored" }),
       });
       assert.equal(result.additionalContext, "");
