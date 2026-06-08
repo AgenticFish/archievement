@@ -11,6 +11,7 @@ import {
   locateEntry,
   isDirOnlyType,
   slugOf,
+  projectOf,
 } from "../../lib/entries/path.js";
 
 test("entryFilePath returns flat-file form", () => {
@@ -92,4 +93,17 @@ test("slugOf: tbd project segment is stripped like any other", () => {
 
 test("slugOf: an entry-slug containing hyphens survives intact", () => {
   assert.equal(slugOf({ type: "unticketed", id: "archievement-plugin_a-b-c-d" }), "a-b-c-d");
+});
+
+test("projectOf returns the project segment before the first underscore", () => {
+  assert.equal(projectOf({ id: "archievement-plugin_find-skill" }), "archievement-plugin");
+  assert.equal(projectOf({ id: "egs-mobile_EGA-5971-voice-refactor" }), "egs-mobile");
+});
+
+test("projectOf returns 'tbd' for the unclassified placeholder", () => {
+  assert.equal(projectOf({ id: "tbd_mcp-transport-stdio-vs-http" }), "tbd");
+});
+
+test("projectOf returns the project even when the entry-slug has hyphens", () => {
+  assert.equal(projectOf({ id: "archievement-plugin_a-b-c-d" }), "archievement-plugin");
 });
