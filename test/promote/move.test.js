@@ -14,14 +14,14 @@ const TODAY = "2026-05-23";
 test("moveEntry graduates a file-layout entry: target created, source deleted, no audit links", async () => {
   await withTmpDir(async (root) => {
     const created = createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "spark" },
+      pointer: { category: "personal", type: "idea", id: "tbd_spark" },
       layout: "file",
       extras: { seed_date: TODAY },
       body: "An idea.\n",
       now: TODAY,
     });
     const from = created.pointer;
-    const to = { category: "personal", type: "unticketed", id: "spark" };
+    const to = { category: "personal", type: "unticketed", id: "tbd_spark" };
 
     moveEntry(root, from, to, { now: TODAY, layout: "file" });
 
@@ -40,14 +40,14 @@ test("moveEntry graduates a file-layout entry: target created, source deleted, n
 test("moveEntry throws if target already exists", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "src" },
+      pointer: { category: "personal", type: "idea", id: "tbd_src" },
       layout: "file",
       extras: {},
       body: "src body",
       now: TODAY,
     });
     createEntry(root, {
-      pointer: { category: "personal", type: "unticketed", id: "src" },
+      pointer: { category: "personal", type: "unticketed", id: "tbd_src" },
       layout: "file",
       extras: {},
       body: "dup body",
@@ -57,8 +57,8 @@ test("moveEntry throws if target already exists", async () => {
       () =>
         moveEntry(
           root,
-          { category: "personal", type: "idea", id: "src" },
-          { category: "personal", type: "unticketed", id: "src" },
+          { category: "personal", type: "idea", id: "tbd_src" },
+          { category: "personal", type: "unticketed", id: "tbd_src" },
           { now: TODAY, layout: "file" },
         ),
       /already exists/,
@@ -69,7 +69,7 @@ test("moveEntry throws if target already exists", async () => {
 test("moveEntry on a dir-layout source copies attachments then deletes the source dir", async () => {
   await withTmpDir(async (root) => {
     const created = createEntry(root, {
-      pointer: { category: "work", type: "unticketed", id: "research-foo" },
+      pointer: { category: "work", type: "unticketed", id: "project-a_research-foo" },
       layout: "dir",
       extras: { project: "project-a" },
       body: "Research overview.\n",
@@ -79,7 +79,7 @@ test("moveEntry on a dir-layout source copies attachments then deletes the sourc
     mkdirSync(join(srcDir, "pr-summaries"), { recursive: true });
     writeFileSync(join(srcDir, "brainstorm.md"), "notes\n");
 
-    const to = { category: "work", type: "ticketed", id: "PROJ-999-research-foo" };
+    const to = { category: "work", type: "ticketed", id: "project-a_PROJ-999-research-foo" };
     moveEntry(root, created.pointer, to, {
       now: TODAY,
       layout: "dir",
