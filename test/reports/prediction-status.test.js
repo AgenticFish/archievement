@@ -59,7 +59,7 @@ test("parseStatusTable returns null when anchors absent", () => {
 test("resolveStatus: a live idea returns its own status", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "foo" },
+      pointer: { category: "personal", type: "idea", id: "tbd_foo" },
       layout: "file",
       extras: {},
       body: "",
@@ -73,7 +73,7 @@ test("resolveStatus: a live idea returns its own status", async () => {
 test("resolveStatus: graduated to unticketed (same slug) returns the unticketed status", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "unticketed", id: "foo" },
+      pointer: { category: "personal", type: "unticketed", id: "tbd_foo" },
       layout: "file",
       extras: {},
       body: "",
@@ -81,7 +81,7 @@ test("resolveStatus: graduated to unticketed (same slug) returns the unticketed 
     });
     updateEntryFrontmatter(
       root,
-      { category: "personal", type: "unticketed", id: "foo" },
+      { category: "personal", type: "unticketed", id: "tbd_foo" },
       { status: "done" },
     );
     const entries = listEntries(root, {});
@@ -92,7 +92,7 @@ test("resolveStatus: graduated to unticketed (same slug) returns the unticketed 
 test("resolveStatus: graduated to ticketed <TICKET>-<slug> is located by slug", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "work", type: "ticketed", id: "EGA-1-foo" },
+      pointer: { category: "work", type: "ticketed", id: "egs-mobile_EGA-1-foo" },
       layout: "dir",
       extras: { ticket_id: "EGA-1" },
       body: "",
@@ -100,7 +100,7 @@ test("resolveStatus: graduated to ticketed <TICKET>-<slug> is located by slug", 
     });
     updateEntryFrontmatter(
       root,
-      { category: "work", type: "ticketed", id: "EGA-1-foo" },
+      { category: "work", type: "ticketed", id: "egs-mobile_EGA-1-foo" },
       { status: "in-progress" },
     );
     const entries = listEntries(root, {});
@@ -118,7 +118,7 @@ test("resolveStatus: slug found nowhere returns removed", async () => {
 test("resolveStatus: exact slug match, not suffix substring", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "unticketed", id: "add-prediction-table" },
+      pointer: { category: "personal", type: "unticketed", id: "tbd_add-prediction-table" },
       layout: "file",
       extras: {},
       body: "",
@@ -132,7 +132,7 @@ test("resolveStatus: exact slug match, not suffix substring", async () => {
 test("freshenStatusTable rewrites status cells, preserves classifications and prose", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "foo" },
+      pointer: { category: "personal", type: "idea", id: "tbd_foo" },
       layout: "file",
       extras: {},
       body: "",
@@ -140,7 +140,7 @@ test("freshenStatusTable rewrites status cells, preserves classifications and pr
     });
     updateEntryFrontmatter(
       root,
-      { category: "personal", type: "idea", id: "foo" },
+      { category: "personal", type: "idea", id: "tbd_foo" },
       { status: "in-progress" },
     );
     const block = renderStatusTable([
@@ -165,7 +165,7 @@ test("freshenStatusTable throws MissingAnchorsError when anchors absent", () => 
 test("refreshReportFile rewrites table in place, leaving frontmatter and prose untouched", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "foo" },
+      pointer: { category: "personal", type: "idea", id: "tbd_foo" },
       layout: "file",
       extras: {},
       body: "",
@@ -184,7 +184,7 @@ test("refreshReportFile rewrites table in place, leaving frontmatter and prose u
 
     updateEntryFrontmatter(
       root,
-      { category: "personal", type: "idea", id: "foo" },
+      { category: "personal", type: "idea", id: "tbd_foo" },
       { status: "done" },
     );
 
@@ -204,7 +204,7 @@ test("refreshReportFile rewrites table in place, leaving frontmatter and prose u
 test("refreshReportFile reports changed=false when nothing changed", async () => {
   await withTmpDir(async (root) => {
     createEntry(root, {
-      pointer: { category: "personal", type: "idea", id: "foo" },
+      pointer: { category: "personal", type: "idea", id: "tbd_foo" },
       layout: "file",
       extras: {},
       body: "",
