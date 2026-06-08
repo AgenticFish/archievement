@@ -27,7 +27,7 @@ Invoke when an existing entry needs to graduate to a new form:
 3. **Ask the target.** AskUserQuestion sequentially:
    - Target type: `ticketed / unticketed / learning / idea` (default to a sensible next step based on source type).
    - Target category: `work / personal` (default to source category).
-   - Target id: **the slug is preserved**. For `ticketed`, ask for the ticket ID and build the id as `<TICKET>-<source-slug>` (e.g. source `voice-refactor` + ticket `EGA-5971` → `EGA-5971-voice-refactor`). For every other type, the target id **equals the source slug** — do not rename. `promote()` will reject a target whose slug differs.
+   - Target id: **the entry-slug is preserved; the project segment may be filled in or changed.** Build the id with `makeId(project, entrySlug)` from `lib/entries/path.js`. The `entrySlug` must match the source's `slugOf` (promote rejects a different entry-slug). For `ticketed`, the entry-slug is `<TICKET>-<source-slug>` (e.g. source slug `voice-refactor` + ticket `EGA-5971` → entry-slug `EGA-5971-voice-refactor`, full id `egs-mobile_EGA-5971-voice-refactor`). For other types the entry-slug **equals the source slug**. The project segment comes from the target project (e.g. the SessionStart slug) or `tbd`; graduating a `tbd_` idea into a real project is the normal way an idea acquires its project.
    - Target layout: `dir / file` — required if source is file-layout and the user wants dir.
 
 4. **Show a plan.** Print: "Promoting (graduating) `<source>` → `<target>`. The source will be **deleted**; its content (and any dir-layout attachments) moves to the target, which keeps the same slug." AskUserQuestion `Proceed / Cancel`.
@@ -39,6 +39,6 @@ Invoke when an existing entry needs to graduate to a new form:
 ## Invariants
 
 - Never overwrite an existing target — orchestrate.js refuses; surface the error and ask for a different id.
-- **promote preserves the slug.** `slugOf(target) === slugOf(source)`; ticketed targets are named `<TICKET>-<slug>`. orchestrate.js enforces this.
+- **promote preserves the entry-slug, not the project.** `slugOf(target) === slugOf(source)` (the project segment is stripped before comparison, so the project may change). Ticketed targets carry `<TICKET>-<slug>` in the entry-slug segment. orchestrate.js enforces this.
 - **promote graduates the source: it is deleted, not preserved.** Content (and dir attachments) is copied to the target first, so nothing is lost. No `promoted_from`/`promoted_to` links are written.
 - `extras` must include `ticket_id` when target type is `ticketed`; ask if missing.
