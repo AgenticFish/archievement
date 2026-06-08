@@ -12,6 +12,7 @@ import {
   isDirOnlyType,
   slugOf,
   projectOf,
+  makeId,
 } from "../../lib/entries/path.js";
 
 test("entryFilePath returns flat-file form", () => {
@@ -67,14 +68,23 @@ test("locateEntry returns null when neither exists", async () => {
 });
 
 test("slugOf: non-ticketed strips only the project segment", () => {
-  assert.equal(slugOf({ type: "idea", id: "tbd_mcp-transport-stdio-vs-http" }), "mcp-transport-stdio-vs-http");
+  assert.equal(
+    slugOf({ type: "idea", id: "tbd_mcp-transport-stdio-vs-http" }),
+    "mcp-transport-stdio-vs-http",
+  );
   assert.equal(slugOf({ type: "unticketed", id: "archievement-plugin_find-skill" }), "find-skill");
   assert.equal(slugOf({ type: "learning", id: "tbd_magnifica-humanitas" }), "magnifica-humanitas");
 });
 
 test("slugOf: ticketed strips the project segment then the TICKET- prefix", () => {
-  assert.equal(slugOf({ type: "ticketed", id: "egs-mobile_EGA-5971-voice-refactor" }), "voice-refactor");
-  assert.equal(slugOf({ type: "ticketed", id: "archievement-plugin_PROJ-123-add-foo-bar" }), "add-foo-bar");
+  assert.equal(
+    slugOf({ type: "ticketed", id: "egs-mobile_EGA-5971-voice-refactor" }),
+    "voice-refactor",
+  );
+  assert.equal(
+    slugOf({ type: "ticketed", id: "archievement-plugin_PROJ-123-add-foo-bar" }),
+    "add-foo-bar",
+  );
 });
 
 test("slugOf: ticketed slug may itself start with a digit", () => {
@@ -106,4 +116,26 @@ test("projectOf returns 'tbd' for the unclassified placeholder", () => {
 
 test("projectOf returns the project even when the entry-slug has hyphens", () => {
   assert.equal(projectOf({ id: "archievement-plugin_a-b-c-d" }), "archievement-plugin");
+});
+
+test("makeId joins project and entry slug with a single underscore", () => {
+  assert.equal(makeId("egs-mobile", "EGA-5971"), "egs-mobile_EGA-5971");
+  assert.equal(makeId("archievement-plugin", "find-skill"), "archievement-plugin_find-skill");
+});
+
+test("makeId defaults a falsy project to the tbd placeholder", () => {
+  assert.equal(makeId("", "foo"), "tbd_foo");
+  assert.equal(makeId(null, "foo"), "tbd_foo");
+  assert.equal(makeId(undefined, "foo"), "tbd_foo");
+});
+
+test("makeId rejects an underscore in either segment", () => {
+  assert.throws(() => makeId("ar_chievement", "foo"), /underscore/);
+  assert.throws(() => makeId("archievement-plugin", "foo_bar"), /underscore/);
+});
+
+test("makeId round-trips through projectOf and slugOf for a non-ticketed id", () => {
+  const id = makeId("archievement-plugin", "find-skill");
+  assert.equal(projectOf({ id }), "archievement-plugin");
+  assert.equal(slugOf({ type: "unticketed", id }), "find-skill");
 });
