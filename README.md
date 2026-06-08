@@ -41,6 +41,8 @@ Two orthogonal axes describe every entry:
 
 Each entry is markdown with YAML frontmatter, stored at `<archievement_root>/<category>/<type>/<id>/` (dir layout) or `<archievement_root>/<category>/<type>/<id>.md` (file layout).
 
+The `<id>` itself encodes the owning project as `<project-slug>_<entry-slug>`, so a filename names its project at a glance — e.g. `personal/unticketed/archievement-plugin_find-skill.md`, `work/ticketed/egs-mobile_EGA-5971-voice-refactor.md`. The `_` is the sole delimiter (exactly once; neither segment contains `_`); an entry with no project uses the literal `tbd` (e.g. `personal/idea/tbd_mcp-transport.md`). The directory layout stays a clean `category`/`type` grid — the project lives in the filename, not as a directory level. Frontmatter `project` remains authoritative; the filename segment mirrors it.
+
 ## Tech
 
 - Node.js 20+ (ESM)
