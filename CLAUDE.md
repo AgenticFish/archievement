@@ -58,7 +58,7 @@ lib/
   config/                      unified config.yml R/W + project matcher (§2)
   git.js                       remote detection + URL normalization (§2)
   frontmatter.js               YAML frontmatter R/W via gray-matter (§3)
-  entries/                     canonical entry CRUD: path / create / read / update / list (§3)
+  entries/                     canonical entry CRUD: path (slugOf/projectOf/makeId id codec) / create / read / update / list (§3)
   promote/                     file → dir expansion + cross-bucket **graduate** (copy then delete source, slug preserved, no audit links) + orchestrate (§4)
   reports/                     deterministic anchors; summary / completion / prediction collectors; perf-review with hard category isolation; timestamped report writer (§5)
   hooks/                       SessionStart + PostToolUse hook logic, injectable for tests (§7)
@@ -78,6 +78,7 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 - **Anonymized examples in docs:** spec, plan, README, and code comments use generic placeholders (`project-a`, `~/archievement`, `PROJ-123`) rather than real company or personal identifiers.
 - **Frontmatter is English:** all YAML frontmatter in entry / report files is English. The body prose follows the user's language preference, set in the unified `${CLAUDE_PLUGIN_DATA}/config.yml` (introduced in §2).
 - **idea is always file-layout** — promote graduates it into unticketed/ticketed for any dir-layout work.
+- **Entry id encodes the project: `<project-slug>_<entry-slug>`** — the filename names its owning project (no project → literal `tbd`). `_` is the sole delimiter (exactly once; neither segment may contain `_`). The `lib/entries/path.js` id codec is the single source of this rule: `makeId(project, entrySlug)` constructs (the ONLY construction point; rejects `_`), `projectOf` reads the project segment, `slugOf` strips the project then (for ticketed) the `<TICKET>-` prefix to recover the cross-promote entry-slug. promote preserves the **entry-slug**; the project segment may be filled in / changed on graduation. The directory layout (`<category>/<type>/`) is unchanged — project is in the filename only. Frontmatter `project` stays authoritative; the filename segment mirrors it (`record` sets both from the same source). Clean break: ids are assumed to carry the `_`; no pre-convention fallback.
 
 ## Execution status
 
@@ -93,5 +94,6 @@ Empty directories carry `.gitkeep` placeholders, which are `git rm`'d as real fi
 | §8 Polish | ✅ Merged (PR #12) | 34-36 — README with install/usage/design pointer; manual E2E smoke test (user-driven, no commit); final consistency review pass |
 | §9 project-setup skill | ✅ Shipped | follow-up — updateProject / removeProject / removeIgnore helpers + project-setup skill (cwd-centric show/configure/ignore) + SessionStart nudge names the skill |
 | §10 find skill | ✅ Shipped | follow-up — find SKILL.md (resolve-root-first recall by filename/content/frontmatter via native Grep/Glob + listEntries, reports excluded) + SessionStart injects `archievement root:` into match/unknown context |
+| §11 project-slug id encoding | ✅ Shipped (PR #34) | follow-up — entry id becomes `<project-slug>_<entry-slug>`; `makeId`/`projectOf` added + two-stage `slugOf` rewrite in `lib/entries/path.js`; record/promote/find skill prose updated. Clean break, no migration. Spec `docs/superpowers/specs/2026-06-07-project-slug-in-filename-design.md`, plan `docs/superpowers/plans/2026-06-08-project-slug-in-filename.md` |
 
-All 8 plan sections plus the §9 project-setup and §10 find follow-ups shipped. The plan in `docs/superpowers/plans/2026-05-23-archievement-implementation.md` is complete.
+All 8 plan sections plus the §9 project-setup, §10 find, and §11 project-slug follow-ups shipped. The plan in `docs/superpowers/plans/2026-05-23-archievement-implementation.md` is complete.
