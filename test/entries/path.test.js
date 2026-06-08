@@ -139,3 +139,22 @@ test("makeId round-trips through projectOf and slugOf for a non-ticketed id", ()
   assert.equal(projectOf({ id }), "archievement-plugin");
   assert.equal(slugOf({ type: "unticketed", id }), "find-skill");
 });
+
+test("slugOf preservation holds across a project change (promote graduation)", () => {
+  // tbd_foo (idea) graduates to archievement-plugin_foo (unticketed):
+  // the project segment changes but the entry-slug is preserved, so promote's
+  // slugOf(from) === slugOf(to) check passes.
+  const from = { type: "idea", id: "tbd_foo" };
+  const to = { type: "unticketed", id: "archievement-plugin_foo" };
+  assert.equal(slugOf(from), slugOf(to));
+  assert.equal(slugOf(from), "foo");
+});
+
+test("slugOf preservation holds when an idea graduates to a ticket", () => {
+  // tbd_voice-refactor (idea) → egs-mobile_EGA-5971-voice-refactor (ticketed):
+  // project filled in AND a ticket prefix added; entry-slug still 'voice-refactor'.
+  const from = { type: "idea", id: "tbd_voice-refactor" };
+  const to = { type: "ticketed", id: "egs-mobile_EGA-5971-voice-refactor" };
+  assert.equal(slugOf(from), slugOf(to));
+  assert.equal(slugOf(from), "voice-refactor");
+});
